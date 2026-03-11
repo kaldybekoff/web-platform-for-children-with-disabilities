@@ -24,8 +24,8 @@ QazEdu Special — это веб-платформа дистанционного
 ## Структура проекта
 
 ```
-edu platform/
-├── Diploma2/          # Frontend (React + Vite)
+edu-platform/
+├── frontend/          # Frontend (React + Vite)
 │   ├── src/
 │   │   ├── api/       # API-клиент
 │   │   ├── components/# UI-компоненты
@@ -35,8 +35,8 @@ edu platform/
 │
 └── backend/           # Backend (FastAPI)
     ├── app/
-    │   ├── api/       # Роуты (auth, courses, lessons, enrollments)
-    │   ├── models/    # Модели БД (User, Course, Lesson, Enrollment)
+    │   ├── api/       # Роуты (auth, courses, lessons, quizzes, admin, teacher)
+    │   ├── models/    # Модели БД (User, Course, Lesson, Quiz, Enrollment)
     │   ├── schemas/   # Pydantic-схемы
     │   └── core/      # Безопасность (JWT, хеширование)
     ├── alembic/       # Миграции базы данных
@@ -88,7 +88,7 @@ Backend будет доступен по адресу: http://localhost:8000
 ### 2. Frontend
 
 ```bash
-cd Diploma2
+cd frontend
 
 # Установить зависимости
 npm install
