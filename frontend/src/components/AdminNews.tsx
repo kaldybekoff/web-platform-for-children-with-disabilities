@@ -134,19 +134,19 @@ export function AdminNews() {
 
   return (
     <section className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center flex-shrink-0">
             <Newspaper className="w-5 h-5 text-orange-600 dark:text-orange-400" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-purple-700 dark:text-purple-400 text-lg">{t('Новости', 'Жаңалықтар')}</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-xs">{t('Управление новостями платформы', 'Платформа жаңалықтарын басқару')}</p>
+            <p className="text-gray-600 dark:text-gray-400 text-xs truncate">{t('Управление новостями платформы', 'Платформа жаңалықтарын басқару')}</p>
           </div>
         </div>
-        <Button className="bg-purple-600 hover:bg-purple-700 rounded-xl text-sm h-9 text-white" onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4 mr-1" />
-          {t('Добавить новость', 'Жаңалық қосу')}
+        <Button className="bg-purple-600 hover:bg-purple-700 rounded-xl text-sm h-9 text-white flex-shrink-0" onClick={() => setShowCreate(true)}>
+          <Plus className="w-4 h-4 sm:mr-1" />
+          <span className="hidden sm:inline">{t('Добавить новость', 'Жаңалық қосу')}</span>
         </Button>
       </div>
 

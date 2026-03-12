@@ -98,8 +98,8 @@ export function AdminUsers() {
         <p className="text-purple-600 dark:text-purple-400 text-sm">{t('Загрузка...', 'Жүктелуде...')}</p>
       ) : (
         <Card className="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-100 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 px-4 pb-2">
+            <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-2 px-3 text-gray-600 dark:text-gray-400 text-xs font-medium">{t('Имя', 'Аты')}</th>

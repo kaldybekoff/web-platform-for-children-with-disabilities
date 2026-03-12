@@ -290,22 +290,23 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button
           variant="outline"
           onClick={() => setCurrentQuestion((prev) => Math.max(0, prev - 1))}
           disabled={currentQuestion === 0}
+          className="w-full sm:w-auto"
         >
           {t('Назад', 'Артқа')}
         </Button>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {/* Check button - shown when answer selected but not yet checked */}
           {!isCurrentChecked && (
             <Button
               onClick={handleCheckAnswer}
               disabled={!hasSelectedAnswer || checking}
-              className="bg-purple-600 hover:bg-purple-700 text-white disabled:bg-purple-400 disabled:text-white/80"
+              className="bg-purple-600 hover:bg-purple-700 text-white disabled:bg-purple-400 disabled:text-white/80 w-full sm:w-auto"
             >
               {checking ? t('Проверка...', 'Тексерілуде...') : t('Проверить', 'Тексеру')}
             </Button>
@@ -317,7 +318,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
               {!isLastQuestion ? (
                 <Button
                   onClick={() => setCurrentQuestion((prev) => prev + 1)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                  className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
                 >
                   {t('Далее', 'Келесі')}
                 </Button>
@@ -325,7 +326,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
                 <Button
                   onClick={handleSubmit}
                   disabled={!checkedAll || submitting}
-                  className="bg-green-500 hover:bg-green-600 text-white disabled:bg-green-300 disabled:text-white/80"
+                  className="bg-green-500 hover:bg-green-600 text-white disabled:bg-green-300 disabled:text-white/80 w-full sm:w-auto"
                 >
                   {submitting ? t('Отправка...', 'Жіберілуде...') : t('Завершить тест', 'Тестті аяқтау')}
                 </Button>

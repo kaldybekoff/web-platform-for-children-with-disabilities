@@ -302,8 +302,8 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
         <span className="text-sm">{t('Назад к курсам', 'Курстарға қайту')}</span>
       </button>
 
-      <div className="mb-6">
-        <h2 className="text-purple-700 dark:text-purple-400 mb-2">{title}</h2>
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-purple-700 dark:text-purple-400 mb-2 text-lg sm:text-xl lg:text-2xl">{title}</h2>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -412,18 +412,18 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
 
             {/* Demo content - only shown for demo lessons */}
             {currentLesson?.is_demo && (
-              <div className="grid grid-cols-3 gap-4 mt-6">
-                <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                  <div className="text-3xl mb-2">👋</div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{t('Привет', 'Сәлем')}</p>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6">
+                <div className="text-center p-3 sm:p-4 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                  <div className="text-2xl sm:text-3xl mb-2">👋</div>
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">{t('Привет', 'Сәлем')}</p>
                 </div>
-                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                  <div className="text-3xl mb-2">🙏</div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{t('Спасибо', 'Рахмет')}</p>
+                <div className="text-center p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+                  <div className="text-2xl sm:text-3xl mb-2">🙏</div>
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">{t('Спасибо', 'Рахмет')}</p>
                 </div>
-                <div className="text-center p-4 bg-green-50 dark:bg-green-900/30 rounded-xl">
-                  <div className="text-3xl mb-2">👋</div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{t('Пока', 'Сау бол')}</p>
+                <div className="text-center p-3 sm:p-4 bg-green-50 dark:bg-green-900/30 rounded-xl">
+                  <div className="text-2xl sm:text-3xl mb-2">👋</div>
+                  <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">{t('Пока', 'Сау бол')}</p>
                 </div>
               </div>
             )}
@@ -527,13 +527,13 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
                           </div>
                         )}
                         
-                        <div className="flex gap-2 pt-2">
+                        <div className="flex flex-wrap gap-2 pt-2">
                           {!isChecked ? (
                             <Button
                               onClick={handleDemoQuizCheck}
                               disabled={!selectedId}
                               size="sm"
-                              className="bg-blue-600 hover:bg-blue-700"
+                              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             >
                               {t('Проверить', 'Тексеру')}
                             </Button>
@@ -543,7 +543,7 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
                                 <Button
                                   onClick={handleDemoQuizNext}
                                   size="sm"
-                                  className="bg-purple-600 hover:bg-purple-700"
+                                  className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
                                 >
                                   {t('Далее', 'Келесі')}
                                 </Button>
@@ -551,7 +551,7 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
                                 <Button
                                   onClick={handleDemoQuizFinish}
                                   size="sm"
-                                  className="bg-green-600 hover:bg-green-700"
+                                  className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
                                 >
                                   {t('Завершить тест', 'Тестті аяқтау')}
                                 </Button>

@@ -51,15 +51,15 @@ export function Header({ activeSection, setActiveSection, onLogout, userRole }: 
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Логотип с иконкой жестового языка */}
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">👋</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-xl sm:text-2xl">👋</span>
             </div>
-            <div>
-              <h1 className="text-purple-600 dark:text-purple-400">
+            <div className="min-w-0">
+              <h1 className="text-purple-600 dark:text-purple-400 text-sm sm:text-base truncate">
                 {t('QazEdu Special', 'QazEdu Special')}
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
                 {t('Дистанционное обучение', 'Қашықтықтан оқыту')}
               </p>
             </div>
@@ -87,25 +87,25 @@ export function Header({ activeSection, setActiveSection, onLogout, userRole }: 
           </nav>
 
           {/* Переключатель языка и темы */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Button
               onClick={toggleTheme}
               variant="outline"
               size="icon"
-              className="rounded-full w-12 h-12 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="rounded-full w-10 h-10 sm:w-12 sm:h-12 dark:border-gray-600 dark:hover:bg-gray-700"
               title={t('Переключить тему', 'Тақырыпты ауыстыру')}
             >
-              {theme === 'light' ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
+              {theme === 'light' ? <Moon className="w-5 h-5 sm:w-6 sm:h-6" /> : <Sun className="w-5 h-5 sm:w-6 sm:h-6" />}
             </Button>
             <Button
               onClick={toggleLanguage}
               variant="outline"
               size="icon"
-              className="rounded-full w-12 h-12 relative dark:border-gray-600 dark:hover:bg-gray-700"
+              className="rounded-full w-10 h-10 sm:w-12 sm:h-12 relative dark:border-gray-600 dark:hover:bg-gray-700"
               title={t('Переключить на казахский', 'Орысшаға ауыстыру')}
             >
-              <Languages className="w-6 h-6" />
-              <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+              <Languages className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white text-xs px-1 sm:px-1.5 py-0.5 rounded-full">
                 {language.toUpperCase()}
               </span>
             </Button>
@@ -114,10 +114,10 @@ export function Header({ activeSection, setActiveSection, onLogout, userRole }: 
                 onClick={onLogout}
                 variant="outline"
                 size="icon"
-                className="rounded-full w-12 h-12 dark:border-gray-600 dark:hover:bg-gray-700"
+                className="rounded-full w-10 h-10 sm:w-12 sm:h-12 dark:border-gray-600 dark:hover:bg-gray-700"
                 title={t('Выйти', 'Шығу')}
               >
-                <LogOut className="w-6 h-6" />
+                <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
               </Button>
             )}
           </div>

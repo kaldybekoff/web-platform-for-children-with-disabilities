@@ -326,30 +326,30 @@ export function AuthPage() {
                   <Label className="text-gray-700 dark:text-gray-300">
                     {t('Я регистрируюсь как', 'Мен тіркелемін')}
                   </Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setRegisterRole('student')}
-                      className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
+                      className={`flex items-center justify-center gap-2 py-3 px-3 sm:px-4 rounded-xl border-2 transition-all ${
                         registerRole === 'student'
                           ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                           : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
-                      <GraduationCap className="w-5 h-5" />
-                      <span className="font-medium">{t('Ученик', 'Оқушы')}</span>
+                      <GraduationCap className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium text-sm sm:text-base">{t('Ученик', 'Оқушы')}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setRegisterRole('teacher')}
-                      className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
+                      className={`flex items-center justify-center gap-2 py-3 px-3 sm:px-4 rounded-xl border-2 transition-all ${
                         registerRole === 'teacher'
                           ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                           : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
-                      <School className="w-5 h-5" />
-                      <span className="font-medium">{t('Учитель', 'Мұғалім')}</span>
+                      <School className="w-5 h-5 flex-shrink-0" />
+                      <span className="font-medium text-sm sm:text-base">{t('Учитель', 'Мұғалім')}</span>
                     </button>
                   </div>
                 </div>
