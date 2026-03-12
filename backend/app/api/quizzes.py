@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser, require_teacher_or_admin
@@ -423,6 +424,50 @@ def delete_answer(
     
     session.delete(answer)
     session.commit()
+
+
+# ===== Check Single Answer =====
+
+class CheckAnswerRequest(BaseModel):
+    answer_id: int
+
+
+class CheckAnswerResponse(BaseModel):
+    is_correct: bool
+    correct_answer_id: int
+
+
+@router.post("/questions/{question_id}/check", response_model=CheckAnswerResponse)
+def check_answer(
+    question_id: int,
+    body: CheckAnswerRequest,
+    current_user: CurrentUser,
+    session: Session = Depends(get_session),
+):
+    """Check if selected answer is correct. Returns correct answer after check."""
+    question = session.get(Question, question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    quiz = session.get(Quiz, question.quiz_id)
+    lesson = session.get(Lesson, quiz.lesson_id)
+    if not _is_enrolled(current_user, lesson.course_id, session):
+        raise HTTPException(status_code=403, detail="Not enrolled in this course")
+    
+    # Get selected answer
+    selected = session.get(Answer, body.answer_id)
+    if not selected or selected.question_id != question_id:
+        raise HTTPException(status_code=400, detail="Invalid answer")
+    
+    # Find correct answer
+    correct = session.exec(
+        select(Answer).where(Answer.question_id == question_id, Answer.is_correct == True)
+    ).first()
+    
+    return CheckAnswerResponse(
+        is_correct=selected.is_correct,
+        correct_answer_id=correct.id if correct else body.answer_id
+    )
 
 
 # ===== Submit Quiz =====

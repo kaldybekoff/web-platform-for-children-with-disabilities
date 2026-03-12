@@ -14,6 +14,7 @@ class LessonCreate(BaseModel):
     subtitle_url: str | None = None
     has_sign_language: bool = False
     duration_seconds: int | None = None
+    is_demo: bool = False
 
 
 class LessonUpdate(BaseModel):
@@ -26,6 +27,7 @@ class LessonUpdate(BaseModel):
     subtitle_url: str | None = None
     has_sign_language: bool | None = None
     duration_seconds: int | None = None
+    is_demo: bool | None = None
 
 
 class LessonResponse(BaseModel):
@@ -40,6 +42,7 @@ class LessonResponse(BaseModel):
     subtitle_url: str | None = None
     has_sign_language: bool = False
     duration_seconds: int | None = None
+    is_demo: bool = False
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

@@ -289,20 +289,23 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
               </p>
             )}
 
-            <div className="grid grid-cols-3 gap-4 mt-6">
-              <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                <div className="text-3xl mb-2">👋</div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{t('Привет', 'Сәлем')}</p>
+            {/* Demo content - only shown for demo lessons */}
+            {currentLesson?.is_demo && (
+              <div className="grid grid-cols-3 gap-4 mt-6">
+                <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                  <div className="text-3xl mb-2">👋</div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{t('Привет', 'Сәлем')}</p>
+                </div>
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+                  <div className="text-3xl mb-2">🙏</div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{t('Спасибо', 'Рахмет')}</p>
+                </div>
+                <div className="text-center p-4 bg-green-50 dark:bg-green-900/30 rounded-xl">
+                  <div className="text-3xl mb-2">👋</div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{t('Пока', 'Сау бол')}</p>
+                </div>
               </div>
-              <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                <div className="text-3xl mb-2">🙏</div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{t('Спасибо', 'Рахмет')}</p>
-              </div>
-              <div className="text-center p-4 bg-green-50 dark:bg-green-900/30 rounded-xl">
-                <div className="text-3xl mb-2">👋</div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{t('Пока', 'Сау бол')}</p>
-              </div>
-            </div>
+            )}
           </Card>
         </div>
 

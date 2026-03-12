@@ -7,6 +7,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import * as quizzesApi from '../api/quizzes';
 import type { QuizResponseStudent, QuizResultResponse } from '../api/types';
 
+interface CheckedQuestion {
+  isCorrect: boolean;
+  correctAnswerId: number;
+}
+
 interface QuizPlayerProps {
   lessonId: number;
   onComplete?: (passed: boolean, score: number) => void;
@@ -21,6 +26,10 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<QuizResultResponse | null>(null);
+  
+  // New states for check flow
+  const [checkedQuestions, setCheckedQuestions] = useState<Record<number, CheckedQuestion>>({});
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     loadQuiz();
@@ -31,6 +40,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
     setError(null);
     setResult(null);
     setSelectedAnswers({});
+    setCheckedQuestions({});
     setCurrentQuestion(0);
     try {
       const data = await quizzesApi.getQuiz(lessonId);
@@ -47,10 +57,35 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
   };
 
   const handleSelectAnswer = (questionId: number, answerId: number) => {
+    // Don't allow changing answer after checking
+    if (checkedQuestions[questionId]) return;
     setSelectedAnswers((prev) => ({
       ...prev,
       [questionId]: answerId,
     }));
+  };
+
+  const handleCheckAnswer = async () => {
+    if (!quiz) return;
+    const question = quiz.questions[currentQuestion];
+    const selectedAnswerId = selectedAnswers[question.id];
+    if (!selectedAnswerId || checkedQuestions[question.id]) return;
+    
+    setChecking(true);
+    try {
+      const res = await quizzesApi.checkAnswer(question.id, selectedAnswerId);
+      setCheckedQuestions((prev) => ({
+        ...prev,
+        [question.id]: {
+          isCorrect: res.is_correct,
+          correctAnswerId: res.correct_answer_id,
+        },
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка проверки');
+    } finally {
+      setChecking(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -145,7 +180,11 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
 
   const question = quiz.questions[currentQuestion];
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100;
-  const answeredAll = quiz.questions.every((q) => selectedAnswers[q.id] !== undefined);
+  const checkedAll = quiz.questions.every((q) => checkedQuestions[q.id] !== undefined);
+  const isCurrentChecked = checkedQuestions[question.id] !== undefined;
+  const currentCheckedData = checkedQuestions[question.id];
+  const hasSelectedAnswer = selectedAnswers[question.id] !== undefined;
+  const isLastQuestion = currentQuestion === quiz.questions.length - 1;
 
   return (
     <Card className="p-6 dark:bg-gray-800 space-y-4">
@@ -169,37 +208,88 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
         <div className="space-y-2">
           {question.answers.map((answer) => {
             const isSelected = selectedAnswers[question.id] === answer.id;
+            const isCorrectAnswer = currentCheckedData?.correctAnswerId === answer.id;
+            const isWrongSelected = isCurrentChecked && isSelected && !currentCheckedData?.isCorrect;
+            
+            let buttonClasses = 'w-full p-4 rounded-xl border-2 transition-all text-left ';
+            let circleClasses = 'w-5 h-5 rounded-full border-2 flex items-center justify-center ';
+            
+            if (isCurrentChecked) {
+              // After checking - show results
+              if (isCorrectAnswer) {
+                buttonClasses += 'border-green-500 bg-green-50 dark:bg-green-900/30';
+                circleClasses += 'border-green-500 bg-green-500';
+              } else if (isWrongSelected) {
+                buttonClasses += 'border-red-500 bg-red-50 dark:bg-red-900/30';
+                circleClasses += 'border-red-500 bg-red-500';
+              } else {
+                buttonClasses += 'border-gray-200 dark:border-gray-600 opacity-50';
+                circleClasses += 'border-gray-300 dark:border-gray-500';
+              }
+            } else {
+              // Before checking - selection mode
+              if (isSelected) {
+                buttonClasses += 'border-purple-500 bg-purple-50 dark:bg-purple-900/30';
+                circleClasses += 'border-purple-500 bg-purple-500';
+              } else {
+                buttonClasses += 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500';
+                circleClasses += 'border-gray-300 dark:border-gray-500';
+              }
+            }
+            
             return (
               <button
                 key={answer.id}
                 onClick={() => handleSelectAnswer(question.id, answer.id)}
-                className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                  isSelected
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                    : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500'
-                }`}
+                disabled={isCurrentChecked}
+                className={buttonClasses}
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      isSelected
-                        ? 'border-purple-500 bg-purple-500'
-                        : 'border-gray-300 dark:border-gray-500'
-                    }`}
-                  >
-                    {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
+                  <div className={circleClasses}>
+                    {isCurrentChecked && isCorrectAnswer && (
+                      <CheckCircle className="w-3 h-3 text-white" />
+                    )}
+                    {isWrongSelected && (
+                      <XCircle className="w-3 h-3 text-white" />
+                    )}
+                    {!isCurrentChecked && isSelected && (
+                      <CheckCircle className="w-3 h-3 text-white" />
+                    )}
                   </div>
-                  <span className="text-gray-700 dark:text-gray-300">
+                  <span className="text-gray-700 dark:text-gray-300 flex-1">
                     {language === 'kz' && answer.text_kz ? answer.text_kz : answer.text_ru}
                   </span>
+                  {isCurrentChecked && isCorrectAnswer && (
+                    <span className="text-green-600 dark:text-green-400 text-sm">
+                      {t('Правильно', 'Дұрыс')}
+                    </span>
+                  )}
+                  {isWrongSelected && (
+                    <span className="text-red-600 dark:text-red-400 text-sm">
+                      {t('Неправильно', 'Қате')}
+                    </span>
+                  )}
                 </div>
               </button>
             );
           })}
         </div>
+
+        {/* Check result message */}
+        {isCurrentChecked && (
+          <div className={`mt-4 p-3 rounded-lg ${
+            currentCheckedData?.isCorrect 
+              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+          }`}>
+            {currentCheckedData?.isCorrect 
+              ? t('✓ Правильный ответ!', '✓ Дұрыс жауап!')
+              : t('✗ Неправильный ответ', '✗ Қате жауап')}
+          </div>
+        )}
       </div>
 
-      {/* Navigation */}
+      {/* Actions */}
       <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
         <Button
           variant="outline"
@@ -209,41 +299,72 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
           {t('Назад', 'Артқа')}
         </Button>
 
-        {currentQuestion < quiz.questions.length - 1 ? (
-          <Button
-            onClick={() => setCurrentQuestion((prev) => prev + 1)}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            {t('Далее', 'Келесі')}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleSubmit}
-            disabled={!answeredAll || submitting}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            {submitting ? t('Отправка...', 'Жіберілуде...') : t('Завершить тест', 'Тестті аяқтау')}
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {/* Check button - shown when answer selected but not yet checked */}
+          {!isCurrentChecked && (
+            <Button
+              onClick={handleCheckAnswer}
+              disabled={!hasSelectedAnswer || checking}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {checking ? t('Проверка...', 'Тексерілуде...') : t('Проверить', 'Тексеру')}
+            </Button>
+          )}
+
+          {/* Next/Finish button - shown only after checking */}
+          {isCurrentChecked && (
+            <>
+              {!isLastQuestion ? (
+                <Button
+                  onClick={() => setCurrentQuestion((prev) => prev + 1)}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {t('Далее', 'Келесі')}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!checkedAll || submitting}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {submitting ? t('Отправка...', 'Жіберілуде...') : t('Завершить тест', 'Тестті аяқтау')}
+                </Button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Question dots */}
       <div className="flex flex-wrap gap-2 justify-center pt-2">
-        {quiz.questions.map((q, i) => (
-          <button
-            key={q.id}
-            onClick={() => setCurrentQuestion(i)}
-            className={`w-8 h-8 rounded-full text-xs font-medium transition-all ${
-              i === currentQuestion
-                ? 'bg-purple-600 text-white'
-                : selectedAnswers[q.id] !== undefined
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-300 dark:border-green-700'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-            }`}
-          >
-            {i + 1}
-          </button>
-        ))}
+        {quiz.questions.map((q, i) => {
+          const qChecked = checkedQuestions[q.id];
+          let dotClasses = 'w-8 h-8 rounded-full text-xs font-medium transition-all ';
+          
+          if (i === currentQuestion) {
+            dotClasses += 'bg-purple-600 text-white';
+          } else if (qChecked) {
+            if (qChecked.isCorrect) {
+              dotClasses += 'bg-green-500 text-white';
+            } else {
+              dotClasses += 'bg-red-500 text-white';
+            }
+          } else if (selectedAnswers[q.id] !== undefined) {
+            dotClasses += 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-700';
+          } else {
+            dotClasses += 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+          }
+          
+          return (
+            <button
+              key={q.id}
+              onClick={() => setCurrentQuestion(i)}
+              className={dotClasses}
+            >
+              {i + 1}
+            </button>
+          );
+        })}
       </div>
     </Card>
   );

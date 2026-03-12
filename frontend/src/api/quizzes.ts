@@ -114,6 +114,20 @@ export async function deleteAnswer(answerId: number): Promise<void> {
   return apiRequest<void>(`/answers/${answerId}`, { method: 'DELETE' });
 }
 
+// ===== Check Single Answer =====
+
+export interface CheckAnswerResponse {
+  is_correct: boolean;
+  correct_answer_id: number;
+}
+
+export async function checkAnswer(questionId: number, answerId: number): Promise<CheckAnswerResponse> {
+  return apiRequest<CheckAnswerResponse>(`/questions/${questionId}/check`, {
+    method: 'POST',
+    body: JSON.stringify({ answer_id: answerId }),
+  });
+}
+
 // ===== Submit & Results =====
 
 export async function submitQuiz(quizId: number, answers: Record<number, number>): Promise<QuizResultResponse> {

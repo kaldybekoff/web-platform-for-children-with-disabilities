@@ -225,9 +225,9 @@ export function TeacherCourses() {
               </div>
             </Card>
 
-            {/* Expanded lessons list */}
+            {/* Expanded lessons list - left aligned */}
             {expandedCourseId === course.id && (
-              <div className="ml-6 mt-2 space-y-2">
+              <div className="mt-2 space-y-2">
                 {(courseLessons[course.id] || []).map((lesson) => (
                   <div key={lesson.id}>
                     {editingLessonId === lesson.id ? (
@@ -237,21 +237,19 @@ export function TeacherCourses() {
                         onSaved={() => loadCourseLessons(course.id)}
                       />
                     ) : (
-                      <Card className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500 dark:text-gray-400 w-6">{lesson.order + 1}.</span>
-                          <div>
-                            <p className="text-sm text-gray-800 dark:text-gray-100">{lesson.title}</p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                              {lesson.video_url && <span className="text-green-600">📹 {t('Видео', 'Видео')}</span>}
-                              {lesson.has_sign_language && <span className="text-purple-600">🤟 {t('Жестовый', 'Ым тілі')}</span>}
-                            </div>
+                      <Card className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border flex items-center justify-start gap-3">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 w-6 shrink-0">{lesson.order + 1}.</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-800 dark:text-gray-100 truncate">{lesson.title}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            {lesson.video_url && <span className="text-green-600">📹 {t('Видео', 'Видео')}</span>}
+                            {lesson.has_sign_language && <span className="text-purple-600">🤟 {t('Жестовый', 'Ым тілі')}</span>}
                           </div>
                         </div>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="rounded-lg h-7 text-xs"
+                          className="rounded-lg h-7 text-xs shrink-0"
                           onClick={() => setEditingLessonId(lesson.id)}
                         >
                           <Settings className="w-3 h-3 mr-1" />
@@ -270,7 +268,7 @@ export function TeacherCourses() {
             )}
 
             {addingLessonId === course.id && (
-              <Card className="p-3 mt-2 ml-4 rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-900/20">
+              <Card className="p-3 mt-2 rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-900/20">
                 <div className="flex gap-2 items-center flex-wrap">
                   <Input value={newLessonTitle} onChange={(e) => setNewLessonTitle(e.target.value)} placeholder={t('Название урока', 'Сабақ атауы')} className="h-8 text-sm flex-1 min-w-[160px] dark:bg-gray-700 dark:border-gray-600" />
                   <Button size="sm" className="rounded-lg h-8 text-xs bg-purple-600 hover:bg-purple-700" onClick={() => handleAddLesson(course.id)} disabled={saving}>{t('Добавить', 'Қосу')}</Button>

@@ -9,7 +9,7 @@ from app.models.course import Course
 from app.models.enrollment import Enrollment
 from app.models.lesson import Lesson
 from app.models.lesson_progress import LessonProgress
-from app.schemas.user import UserResponse, UserUpdate
+from app.schemas.user import UserResponse
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -126,73 +126,6 @@ def get_user(
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    return UserResponse.model_validate(user)
-
-
-@router.patch("/users/{user_id}", response_model=UserResponse)
-def update_user(
-    user_id: int,
-    body: UserUpdate,
-    current_user: CurrentUser,
-    session: Session = Depends(get_session),
-):
-    """Update user. Admin only."""
-    require_admin(current_user)
-    
-    user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    if body.first_name is not None:
-        user.first_name = body.first_name
-    if body.last_name is not None:
-        user.last_name = body.last_name
-    if body.phone is not None:
-        user.phone = body.phone
-    if body.email is not None:
-        # Check email uniqueness
-        existing = session.exec(select(User).where(User.email == body.email, User.id != user_id)).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Email already in use")
-        user.email = body.email
-    
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    
-    return UserResponse.model_validate(user)
-
-
-class AdminUserRoleUpdate(BaseModel):
-    role: str
-
-
-@router.patch("/users/{user_id}/role", response_model=UserResponse)
-def update_user_role(
-    user_id: int,
-    body: AdminUserRoleUpdate,
-    current_user: CurrentUser,
-    session: Session = Depends(get_session),
-):
-    """Change user role. Admin only."""
-    require_admin(current_user)
-    
-    if body.role not in ("student", "teacher", "admin"):
-        raise HTTPException(status_code=400, detail="Invalid role")
-    
-    user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Prevent admin from demoting themselves
-    if user.id == current_user.id and body.role != "admin":
-        raise HTTPException(status_code=400, detail="Cannot change your own role")
-    
-    user.role = body.role
-    session.add(user)
-    session.commit()
-    session.refresh(user)
     
     return UserResponse.model_validate(user)
 

@@ -10,6 +10,7 @@ import { AuthPage } from './components/AuthPage';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { TeacherCourses } from './components/TeacherCourses';
 import { TeacherStudents } from './components/TeacherStudents';
+import { TeacherProfile } from './components/TeacherProfile';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminUsers } from './components/AdminUsers';
 import { AdminCourses } from './components/AdminCourses';
@@ -88,6 +89,7 @@ function AppContent() {
           {activeSection === 'dashboard' && <TeacherDashboard />}
           {activeSection === 'courses' && <TeacherCourses />}
           {activeSection === 'students' && <TeacherStudents />}
+          {activeSection === 'profile' && <TeacherProfile />}
           {activeSection === 'community' && <CommunityPage />}
         </>
       )}

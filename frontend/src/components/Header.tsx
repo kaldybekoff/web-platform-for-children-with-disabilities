@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, BookOpen, Video, Users, Settings, Languages, UserCircle, Sun, Moon, LogOut, LayoutDashboard, Shield, BarChart3, MessageCircle } from 'lucide-react';
+import { Home, BookOpen, Video, Users, Settings, Languages, UserCircle, User, Sun, Moon, LogOut, LayoutDashboard, Shield, BarChart3, MessageCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -25,6 +25,7 @@ const teacherNav = [
   { id: 'dashboard', icon: LayoutDashboard, labelRu: 'Панель', labelKz: 'Панель' },
   { id: 'courses', icon: BookOpen, labelRu: 'Мои курсы', labelKz: 'Менің курстарым' },
   { id: 'students', icon: Users, labelRu: 'Ученики', labelKz: 'Оқушылар' },
+  { id: 'profile', icon: User, labelRu: 'Профиль', labelKz: 'Профиль' },
   { id: 'community', icon: MessageCircle, labelRu: 'Сообщество', labelKz: 'Қоғамдастық' },
 ];
 

@@ -8,6 +8,12 @@ import { useLanguage } from '../contexts/LanguageContext';
 import * as quizzesApi from '../api/quizzes';
 import type { QuizResponse, QuestionResponse, AnswerResponse } from '../api/types';
 
+interface NewAnswerOption {
+  text_ru: string;
+  text_kz: string;
+  is_correct: boolean;
+}
+
 interface QuizEditorProps {
   lessonId: number;
   onClose?: () => void;
@@ -21,10 +27,14 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // New question form
+  // New question form with multiple answers
   const [newQuestionRu, setNewQuestionRu] = useState('');
   const [newQuestionKz, setNewQuestionKz] = useState('');
   const [showAddQuestion, setShowAddQuestion] = useState(false);
+  const [newAnswerOptions, setNewAnswerOptions] = useState<NewAnswerOption[]>([
+    { text_ru: '', text_kz: '', is_correct: false },
+    { text_ru: '', text_kz: '', is_correct: false },
+  ]);
 
   // New answer form (per question)
   const [addingAnswerToQuestion, setAddingAnswerToQuestion] = useState<number | null>(null);
@@ -76,12 +86,28 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
 
   const handleAddQuestion = async () => {
     if (!quiz || !newQuestionRu.trim()) return;
+    const validAnswers = newAnswerOptions.filter((a) => a.text_ru.trim());
+    if (validAnswers.length < 2) {
+      setError(t('Добавьте минимум 2 варианта ответа', 'Кемінде 2 жауап нұсқасын қосыңыз'));
+      return;
+    }
+    const hasCorrect = validAnswers.some((a) => a.is_correct);
+    if (!hasCorrect) {
+      setError(t('Отметьте хотя бы один правильный ответ', 'Кемінде бір дұрыс жауапты белгілеңіз'));
+      return;
+    }
     setSaving(true);
     try {
       const question = await quizzesApi.createQuestion(quiz.id, {
         text_ru: newQuestionRu.trim(),
         text_kz: newQuestionKz.trim(),
         order: quiz.questions.length,
+        answers: validAnswers.map((a, i) => ({
+          text_ru: a.text_ru.trim(),
+          text_kz: a.text_kz.trim(),
+          is_correct: a.is_correct,
+          order: i,
+        })),
       });
       setQuiz({
         ...quiz,
@@ -89,6 +115,10 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
       });
       setNewQuestionRu('');
       setNewQuestionKz('');
+      setNewAnswerOptions([
+        { text_ru: '', text_kz: '', is_correct: false },
+        { text_ru: '', text_kz: '', is_correct: false },
+      ]);
       setShowAddQuestion(false);
       showSuccess(t('Вопрос добавлен', 'Сұрақ қосылды'));
     } catch (err) {
@@ -96,6 +126,21 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleAddAnswerOption = () => {
+    setNewAnswerOptions([...newAnswerOptions, { text_ru: '', text_kz: '', is_correct: false }]);
+  };
+
+  const handleRemoveAnswerOption = (index: number) => {
+    if (newAnswerOptions.length <= 2) return;
+    setNewAnswerOptions(newAnswerOptions.filter((_, i) => i !== index));
+  };
+
+  const handleAnswerOptionChange = (index: number, field: keyof NewAnswerOption, value: string | boolean) => {
+    setNewAnswerOptions(
+      newAnswerOptions.map((a, i) => (i === index ? { ...a, [field]: value } : a))
+    );
   };
 
   const handleDeleteQuestion = async (questionId: number) => {
@@ -393,6 +438,58 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
               placeholder={t('Сұрақты енгізіңіз...', 'Сұрақты енгізіңіз...')}
             />
           </div>
+
+          {/* Multiple answer options */}
+          <div className="space-y-2">
+            <Label className="text-xs">{t('Варианты ответа', 'Жауап нұсқалары')}</Label>
+            {newAnswerOptions.map((opt, idx) => (
+              <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => handleAnswerOptionChange(idx, 'is_correct', !opt.is_correct)}
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    opt.is_correct
+                      ? 'border-green-500 bg-green-500 text-white'
+                      : 'border-gray-300 dark:border-gray-500'
+                  }`}
+                >
+                  {opt.is_correct && <Check className="w-3 h-3" />}
+                </button>
+                <Input
+                  value={opt.text_ru}
+                  onChange={(e) => handleAnswerOptionChange(idx, 'text_ru', e.target.value)}
+                  placeholder={t('Ответ (рус)', 'Жауап (орыс)')}
+                  className="flex-1 h-8 text-sm"
+                />
+                <Input
+                  value={opt.text_kz}
+                  onChange={(e) => handleAnswerOptionChange(idx, 'text_kz', e.target.value)}
+                  placeholder={t('Ответ (каз)', 'Жауап (қаз)')}
+                  className="flex-1 h-8 text-sm"
+                />
+                {newAnswerOptions.length > 2 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveAnswerOption(idx)}
+                    className="text-red-500 hover:text-red-600 p-1 h-auto"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddAnswerOption}
+              className="text-xs h-7"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              {t('Добавить вариант', 'Нұсқа қосу')}
+            </Button>
+          </div>
+
           <div className="flex gap-2">
             <Button
               onClick={handleAddQuestion}
@@ -407,6 +504,10 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
                 setShowAddQuestion(false);
                 setNewQuestionRu('');
                 setNewQuestionKz('');
+                setNewAnswerOptions([
+                  { text_ru: '', text_kz: '', is_correct: false },
+                  { text_ru: '', text_kz: '', is_correct: false },
+                ]);
               }}
             >
               {t('Отмена', 'Болдырмау')}

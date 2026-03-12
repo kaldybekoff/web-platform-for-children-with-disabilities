@@ -20,5 +20,8 @@ class Lesson(SQLModel, table=True):
     has_sign_language: bool = Field(default=False)
     duration_seconds: int | None = Field(default=None)
     
+    # Demo lesson flag - demo lessons are sample content for new users
+    is_demo: bool = Field(default=False)
+    
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

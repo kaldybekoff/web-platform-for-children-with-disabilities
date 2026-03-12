@@ -57,6 +57,7 @@ export interface LessonResponse {
   subtitle_url: string | null;
   has_sign_language: boolean;
   duration_seconds: number | null;
+  is_demo: boolean;
   created_at: string | null;
   updated_at: string | null;
 }
