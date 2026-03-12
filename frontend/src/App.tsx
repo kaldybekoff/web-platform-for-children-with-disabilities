@@ -6,6 +6,7 @@ import { FeaturesSection } from './components/FeaturesSection';
 import { InteractiveLessonDemo } from './components/InteractiveLessonDemo';
 import { UserProfile } from './components/UserProfile';
 import { CommunityPage } from './components/CommunityPage';
+import { AIChat } from './components/AIChat';
 import { AuthPage } from './components/AuthPage';
 import { TeacherCourses } from './components/TeacherCourses';
 import { TeacherStudents } from './components/TeacherStudents';
@@ -95,6 +96,7 @@ function AppContent() {
           )}
           {activeSection === 'profile' && <UserProfile setActiveSection={setActiveSection} onOpenLesson={(courseId) => openLesson(courseId)} />}
           {activeSection === 'community' && <CommunityPage />}
+          {activeSection === 'ai-chat' && <AIChat />}
         </>
       )}
 

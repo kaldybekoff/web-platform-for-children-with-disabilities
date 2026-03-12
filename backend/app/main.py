@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlmodel import Session
 
 from app.core.config import settings
-from app.api import auth, users, courses, lessons, enrollments, quizzes, progress, admin, teacher, news, community
+from app.api import auth, users, courses, lessons, enrollments, quizzes, progress, admin, teacher, news, community, ai
 from app.db.session import engine, create_db_and_tables
 from app.core.seed import run_seeds
 
@@ -33,6 +33,7 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(teacher.router, prefix="/api")
 app.include_router(news.router, prefix="/api")
 app.include_router(community.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
 
 
 @app.on_event("startup")

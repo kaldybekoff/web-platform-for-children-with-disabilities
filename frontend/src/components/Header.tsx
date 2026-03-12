@@ -1,4 +1,4 @@
-import { Home, BookOpen, Video, Users, Languages, UserCircle, User, Sun, Moon, LogOut, LayoutDashboard, BarChart3, MessageCircle, Newspaper } from 'lucide-react';
+import { Home, BookOpen, Video, Users, Languages, UserCircle, User, Sun, Moon, LogOut, LayoutDashboard, BarChart3, MessageCircle, Newspaper, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,6 +15,7 @@ const studentNav = [
   { id: 'home', icon: Home, labelRu: 'Главная', labelKz: 'Басты бет' },
   { id: 'courses', icon: BookOpen, labelRu: 'Курсы', labelKz: 'Курстар' },
   { id: 'lesson', icon: Video, labelRu: 'Урок (демо)', labelKz: 'Сабақ (демо)' },
+  { id: 'ai-chat', icon: Sparkles, labelRu: 'AI Помощник', labelKz: 'AI Көмекші' },
   { id: 'profile', icon: UserCircle, labelRu: 'Профиль', labelKz: 'Профиль' },
   { id: 'community', icon: Users, labelRu: 'Сообщество', labelKz: 'Қоғамдастық' },
 ];
