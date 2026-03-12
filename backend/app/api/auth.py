@@ -27,7 +27,14 @@ def register(
     body: UserCreate,
     session: Session = Depends(get_session),
 ):
-    """Create a new user."""
+    """Create a new user. Admin role cannot be created via public registration."""
+    # Prevent admin registration through public API
+    if body.role == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin accounts cannot be created through registration",
+        )
+    
     existing = session.exec(select(User).where(User.email == body.email)).first()
     if existing:
         raise HTTPException(

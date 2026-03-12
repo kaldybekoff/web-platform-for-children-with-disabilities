@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from sqlmodel import Session
 
 from app.config import settings
 from app.api import auth, users, courses, lessons, enrollments, quizzes, progress, admin, teacher
 from app.database import engine, create_db_and_tables
+from app.core.seed import run_seeds
 
 app = FastAPI(
     title="QazEdu Special API",
@@ -33,9 +35,13 @@ app.include_router(teacher.router, prefix="/api")
 
 @app.on_event("startup")
 def on_startup():
-    """При старте на SQLite создаём таблицы, если их ещё нет."""
+    """Initialize database and seed admin user on startup."""
     if "sqlite" in settings.database_url:
         create_db_and_tables()
+    
+    # Seed admin user (creates only if doesn't exist)
+    with Session(engine) as session:
+        run_seeds(session)
 
 
 @app.get("/health")
