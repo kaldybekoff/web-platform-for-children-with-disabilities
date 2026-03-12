@@ -108,7 +108,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
 
   if (loading) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <p className="text-purple-600 dark:text-purple-400">{t('Загрузка теста...', 'Тест жүктелуде...')}</p>
       </Card>
     );
@@ -116,7 +116,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
 
   if (error) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <p className="text-red-600 dark:text-red-400">{error}</p>
       </Card>
     );
@@ -124,7 +124,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
 
   if (!quiz || quiz.questions.length === 0) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <p className="text-gray-600 dark:text-gray-400">
           {t('Для этого урока нет теста', 'Бұл сабаққа тест жоқ')}
         </p>
@@ -135,7 +135,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
   // Show result
   if (result) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <div className="text-center space-y-4">
           {result.passed ? (
             <>
@@ -187,7 +187,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
   const isLastQuestion = currentQuestion === quiz.questions.length - 1;
 
   return (
-    <Card className="p-6 dark:bg-gray-800 space-y-4">
+    <Card className="p-6 bg-white dark:bg-gray-800 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">
           {quiz.title || t('Тест', 'Тест')}
@@ -223,8 +223,8 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
                 buttonClasses += 'border-red-500 bg-red-50 dark:bg-red-900/30';
                 circleClasses += 'border-red-500 bg-red-500';
               } else {
-                buttonClasses += 'border-gray-200 dark:border-gray-600 opacity-50';
-                circleClasses += 'border-gray-300 dark:border-gray-500';
+                buttonClasses += 'border-gray-300 dark:border-gray-600 opacity-60';
+                circleClasses += 'border-gray-400 dark:border-gray-500';
               }
             } else {
               // Before checking - selection mode
@@ -232,8 +232,8 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
                 buttonClasses += 'border-purple-500 bg-purple-50 dark:bg-purple-900/30';
                 circleClasses += 'border-purple-500 bg-purple-500';
               } else {
-                buttonClasses += 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500';
-                circleClasses += 'border-gray-300 dark:border-gray-500';
+                buttonClasses += 'border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500';
+                circleClasses += 'border-gray-400 dark:border-gray-500';
               }
             }
             
@@ -352,7 +352,7 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
           } else if (selectedAnswers[q.id] !== undefined) {
             dotClasses += 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-700';
           } else {
-            dotClasses += 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+            dotClasses += 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-400';
           }
           
           return (

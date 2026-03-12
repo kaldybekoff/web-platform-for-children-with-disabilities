@@ -18,7 +18,6 @@ def user_to_response(user: User) -> UserResponse:
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
-        phone=user.phone,
         role=user.role,
         created_at=user.created_at,
         updated_at=user.updated_at,
@@ -37,7 +36,7 @@ def update_me(
     current_user: CurrentUser,
     session: Session = Depends(get_session),
 ):
-    """Update current user's first_name, last_name, phone, email."""
+    """Update current user's first_name, last_name, email."""
     if body.email is not None:
         other = session.exec(select(User).where(User.email == body.email, User.id != current_user.id)).first()
         if other:
@@ -50,8 +49,6 @@ def update_me(
         current_user.first_name = body.first_name
     if body.last_name is not None:
         current_user.last_name = body.last_name
-    if body.phone is not None:
-        current_user.phone = body.phone
     current_user.updated_at = datetime.utcnow()
     session.add(current_user)
     session.commit()

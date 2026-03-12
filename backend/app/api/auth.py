@@ -15,7 +15,6 @@ def user_to_response(user: User) -> UserResponse:
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
-        phone=user.phone,
         role=user.role,
         created_at=user.created_at,
         updated_at=user.updated_at,
@@ -46,7 +45,6 @@ def register(
         password_hash=hash_password(body.password),
         first_name=body.first_name,
         last_name=body.last_name,
-        phone=body.phone,
         role=body.role,
     )
     session.add(user)

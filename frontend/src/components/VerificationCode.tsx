@@ -100,7 +100,7 @@ export function VerificationCode({ length = 6, onComplete, onResend }: Verificat
             onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             className="w-12 h-14 text-center text-2xl border-2 border-gray-300 dark:border-gray-600 rounded-xl
-                       focus:border-purple-500 focus:outline-none dark:bg-gray-700 dark:text-white transition-colors"
+                       bg-white text-gray-900 focus:border-purple-500 focus:outline-none dark:bg-gray-700 dark:text-white transition-colors"
           />
         ))}
       </div>

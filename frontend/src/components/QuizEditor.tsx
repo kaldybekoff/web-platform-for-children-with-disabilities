@@ -236,7 +236,7 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
 
   if (loading) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <p className="text-purple-600 dark:text-purple-400">{t('Загрузка...', 'Жүктелуде...')}</p>
       </Card>
     );
@@ -244,7 +244,7 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
 
   if (!quiz) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <div className="text-center">
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {t('У этого урока пока нет квиза', 'Бұл сабақта әлі тест жоқ')}
@@ -268,7 +268,7 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
   }
 
   return (
-    <Card className="p-6 dark:bg-gray-800 space-y-4">
+    <Card className="p-6 bg-white dark:bg-gray-800 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">
           {t('Редактор квиза', 'Тест редакторы')}
@@ -290,7 +290,7 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
       {/* Questions list */}
       <div className="space-y-4">
         {quiz.questions.map((question, qIndex) => (
-          <Card key={question.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 border">
+          <Card key={question.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600">
             <div className="flex items-start gap-2 mb-3">
               <span className="text-purple-600 dark:text-purple-400 font-medium">
                 {qIndex + 1}.
@@ -320,7 +320,7 @@ export function QuizEditor({ lessonId, onClose }: QuizEditorProps) {
                   className={`flex items-center gap-2 p-2 rounded-lg border ${
                     answer.is_correct
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                      : 'border-gray-200 dark:border-gray-600'
+                      : 'border-gray-300 dark:border-gray-600'
                   }`}
                 >
                   <button

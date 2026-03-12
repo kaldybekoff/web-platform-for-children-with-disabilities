@@ -13,7 +13,6 @@ class UserCreate(BaseModel):
     password: str
     first_name: str = ""
     last_name: str = ""
-    phone: str = ""
     role: Role = "student"
 
     @field_validator("password")
@@ -36,7 +35,6 @@ class UserUpdate(BaseModel):
 
     first_name: str | None = None
     last_name: str | None = None
-    phone: str | None = None
     email: EmailStr | None = None
 
 
@@ -61,7 +59,6 @@ class UserResponse(BaseModel):
     email: str
     first_name: str
     last_name: str
-    phone: str
     role: Role
     created_at: datetime
     updated_at: datetime

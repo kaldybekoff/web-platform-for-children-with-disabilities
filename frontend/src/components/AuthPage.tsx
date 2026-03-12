@@ -333,7 +333,7 @@ export function AuthPage() {
                       className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
                         registerRole === 'student'
                           ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
+                          : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
                       <GraduationCap className="w-5 h-5" />
@@ -345,7 +345,7 @@ export function AuthPage() {
                       className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
                         registerRole === 'teacher'
                           ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                          : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
+                          : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
                       <School className="w-5 h-5" />

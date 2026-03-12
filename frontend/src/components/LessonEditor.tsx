@@ -83,14 +83,14 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
 
   if (loading) {
     return (
-      <Card className="p-6 dark:bg-gray-800">
+      <Card className="p-6 bg-white dark:bg-gray-800">
         <p className="text-purple-600 dark:text-purple-400">{t('Загрузка...', 'Жүктелуде...')}</p>
       </Card>
     );
   }
 
   return (
-    <Card className="p-6 dark:bg-gray-800 space-y-4">
+    <Card className="p-6 bg-white dark:bg-gray-800 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100">
           {t('Редактирование урока', 'Сабақты өңдеу')}
@@ -119,7 +119,7 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="mt-1 w-full h-24 px-3 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+            className="mt-1 w-full h-24 px-3 py-2 border rounded-lg text-sm bg-white border-gray-300 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
           />
         </div>
 

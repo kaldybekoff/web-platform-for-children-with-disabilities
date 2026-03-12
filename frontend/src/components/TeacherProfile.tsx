@@ -22,7 +22,6 @@ export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
   const [error, setError] = useState<string | null>(null);
   const [editedFirstName, setEditedFirstName] = useState('');
   const [editedLastName, setEditedLastName] = useState('');
-  const [editedPhone, setEditedPhone] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -32,7 +31,6 @@ export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
         setStats(teacherStats);
         setEditedFirstName(user.first_name);
         setEditedLastName(user.last_name);
-        setEditedPhone(user.phone || '');
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Ошибка'))
       .finally(() => setLoading(false));
@@ -49,7 +47,6 @@ export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
       const updated = await meApi.updateMe({
         first_name: editedFirstName,
         last_name: editedLastName,
-        phone: editedPhone,
       });
       setUserData(updated);
       setIsEditing(false);
@@ -63,7 +60,6 @@ export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
   const handleCancel = () => {
     setEditedFirstName(userData?.first_name ?? '');
     setEditedLastName(userData?.last_name ?? '');
-    setEditedPhone(userData?.phone ?? '');
     setIsEditing(false);
   };
 
@@ -151,15 +147,6 @@ export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className="text-xs text-gray-600 dark:text-gray-400">{t('Телефон', 'Телефон')}</label>
-                      <Input
-                        value={editedPhone}
-                        onChange={(e) => setEditedPhone(e.target.value)}
-                        className="mt-1 dark:bg-gray-700 dark:border-gray-600"
-                        placeholder="+7 XXX XXX XX XX"
-                      />
-                    </div>
                     <div className="flex gap-2 pt-2">
                       <Button
                         onClick={handleSave}
@@ -199,12 +186,6 @@ export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
                         <Shield className="w-4 h-4" />
                         <span>{t(roleLabel[userData?.role || 'teacher']?.ru, roleLabel[userData?.role || 'teacher']?.kz)}</span>
                       </div>
-                      {userData?.phone && (
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <span className="w-4 h-4 text-center">📞</span>
-                          <span>{userData.phone}</span>
-                        </div>
-                      )}
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">

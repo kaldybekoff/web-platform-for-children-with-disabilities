@@ -479,10 +479,10 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
                             if (isChecked) {
                               if (isCorrect) btnClass += 'border-green-500 bg-green-50 dark:bg-green-900/30';
                               else if (isWrong) btnClass += 'border-red-500 bg-red-50 dark:bg-red-900/30';
-                              else btnClass += 'border-gray-200 dark:border-gray-600 opacity-50';
+                              else btnClass += 'border-gray-300 dark:border-gray-600 opacity-50';
                             } else {
                               if (isSelected) btnClass += 'border-purple-500 bg-purple-50 dark:bg-purple-900/30';
-                              else btnClass += 'border-gray-200 dark:border-gray-600 hover:border-purple-300';
+                              else btnClass += 'border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500';
                             }
                             
                             return (
@@ -694,7 +694,7 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
                     <button
                       key={l.id}
                       onClick={() => onSelectLesson?.(l.id)}
-                      className={`w-full text-left px-3 py-2 rounded-xl border-2 transition-all ${currentLesson?.id === l.id ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300'}`}
+                      className={`w-full text-left px-3 py-2 rounded-xl border-2 transition-all ${currentLesson?.id === l.id ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30' : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500'}`}
                     >
                       {l.order + 1}. {l.title}
                     </button>

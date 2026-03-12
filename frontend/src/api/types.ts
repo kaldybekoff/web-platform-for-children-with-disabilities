@@ -5,7 +5,6 @@ export interface UserResponse {
   email: string;
   first_name: string;
   last_name: string;
-  phone: string;
   role: UserRole;
   created_at: string;
   updated_at: string;
@@ -22,7 +21,6 @@ export interface UserCreate {
   password: string;
   first_name?: string;
   last_name?: string;
-  phone?: string;
   role?: UserRole;
 }
 
@@ -34,7 +32,6 @@ export interface UserLogin {
 export interface UserUpdate {
   first_name?: string;
   last_name?: string;
-  phone?: string;
   email?: string;
 }
 
