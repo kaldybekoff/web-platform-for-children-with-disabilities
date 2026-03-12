@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import Session, select, func
 
 from app.api.deps import CurrentUser, require_admin
-from app.database import get_session
+from app.db.session import get_session
 from app.models.user import User
 from app.models.course import Course
 from app.models.enrollment import Enrollment

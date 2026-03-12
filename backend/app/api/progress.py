@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser
-from app.database import get_session
+from app.db.session import get_session
 from app.models.lesson import Lesson
 from app.models.lesson_progress import LessonProgress
 from app.models.enrollment import Enrollment

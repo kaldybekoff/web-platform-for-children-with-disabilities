@@ -40,6 +40,20 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
 
 
+class PasswordChange(BaseModel):
+    """Request body for password change."""
+
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters")
+        return v
+
+
 class UserResponse(BaseModel):
     """User in API responses (no password)."""
 

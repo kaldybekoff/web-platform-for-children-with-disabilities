@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import bcrypt
 from jose import JWTError, jwt
 
-from app.config import settings
+from app.core.config import settings
 
 # bcrypt ограничивает пароль 72 байтами
 MAX_PASSWORD_BYTES = 72

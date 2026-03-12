@@ -1,10 +1,11 @@
+"""Application configuration from environment variables."""
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """Application settings from environment variables."""
 
-    # Database: SQLite по умолчанию (файл qazedu.db в папке backend). Для PostgreSQL задайте DATABASE_URL в .env
+    # Database: SQLite by default. For PostgreSQL set DATABASE_URL in .env
     database_url: str = "sqlite:///./qazedu.db"
 
     # JWT

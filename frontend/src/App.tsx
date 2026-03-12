@@ -99,7 +99,7 @@ function AppContent() {
           {activeSection === 'dashboard' && <TeacherDashboard />}
           {activeSection === 'courses' && <TeacherCourses />}
           {activeSection === 'students' && <TeacherStudents />}
-          {activeSection === 'profile' && <TeacherProfile />}
+          {activeSection === 'profile' && <TeacherProfile setActiveSection={setActiveSection} />}
           {activeSection === 'community' && <CommunityPage />}
         </>
       )}

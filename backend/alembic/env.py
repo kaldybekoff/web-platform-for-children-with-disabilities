@@ -10,7 +10,7 @@ from sqlmodel import SQLModel
 # Add app to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.config import settings
+from app.core.config import settings
 from app.models import User  # noqa: F401 - register model with SQLModel.metadata
 
 config = context.config

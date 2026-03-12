@@ -11,3 +11,15 @@ export async function updateMe(body: UserUpdate): Promise<UserResponse> {
     body: JSON.stringify(body),
   });
 }
+
+export interface PasswordChangeRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export async function changePassword(body: PasswordChangeRequest): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/me/password', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}

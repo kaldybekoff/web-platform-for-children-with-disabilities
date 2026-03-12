@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { UserCircle, BookOpen, Users, Edit2, Save, X, Mail, Shield } from 'lucide-react';
+import { UserCircle, BookOpen, Users, Edit2, Save, X, Mail, Shield, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -9,7 +9,11 @@ import * as meApi from '../api/me';
 import * as teacherApi from '../api/teacher';
 import type { UserResponse, TeacherStats } from '../api/types';
 
-export function TeacherProfile() {
+interface TeacherProfileProps {
+  setActiveSection?: (section: string) => void;
+}
+
+export function TeacherProfile({ setActiveSection }: TeacherProfileProps) {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState<UserResponse | null>(null);
@@ -87,6 +91,15 @@ export function TeacherProfile() {
 
   return (
     <section className="container mx-auto px-4 py-8">
+      {/* Back button */}
+      <button
+        onClick={() => setActiveSection?.('dashboard')}
+        className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-4"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="text-sm">{t('К панели', 'Панельге')}</span>
+      </button>
+
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">
           <UserCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />

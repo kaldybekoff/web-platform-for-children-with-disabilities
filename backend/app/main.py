@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlmodel import Session
 
-from app.config import settings
+from app.core.config import settings
 from app.api import auth, users, courses, lessons, enrollments, quizzes, progress, admin, teacher
-from app.database import engine, create_db_and_tables
+from app.db.session import engine, create_db_and_tables
 from app.core.seed import run_seeds
 
 app = FastAPI(

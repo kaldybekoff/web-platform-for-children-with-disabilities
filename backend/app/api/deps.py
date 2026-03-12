@@ -5,7 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session, select
 
 from app.core.security import decode_access_token
-from app.database import get_session
+from app.db.session import get_session
 from app.models.user import User
 
 security = HTTPBearer(auto_error=False)

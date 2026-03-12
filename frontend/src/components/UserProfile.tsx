@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Award, BookOpen, Trophy, Star, Medal, Target, Clock, Edit2, Save, X } from 'lucide-react';
+import { Award, BookOpen, Trophy, Star, Medal, Target, Clock, Edit2, Save, X, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -174,6 +174,14 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-8 transition-colors duration-300">
       <div className="container mx-auto px-4 max-w-6xl">
+        {/* Back button */}
+        <button
+          onClick={() => setActiveSection('home')}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm">{t('На главную', 'Басты бетке')}</span>
+        </button>
 
         {/* Профиль пользователя */}
         <Card className="p-6 md:p-8 bg-white dark:bg-gray-800 shadow-xl border-4 border-purple-300 dark:border-purple-600 rounded-3xl mb-8 transition-colors duration-300">

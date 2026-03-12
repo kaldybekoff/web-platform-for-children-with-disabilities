@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, ChevronRight, CheckCircle, XCircle, Hand } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, ChevronRight, CheckCircle, XCircle, Hand, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { Card } from './ui/card';
@@ -293,6 +293,15 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
 
   return (
     <section className="container mx-auto px-4 py-8">
+      {/* Back button */}
+      <button
+        onClick={() => setActiveSection?.('courses')}
+        className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-4"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="text-sm">{t('Назад к курсам', 'Курстарға қайту')}</span>
+      </button>
+
       <div className="mb-6">
         <h2 className="text-purple-700 dark:text-purple-400 mb-2">{title}</h2>
       </div>

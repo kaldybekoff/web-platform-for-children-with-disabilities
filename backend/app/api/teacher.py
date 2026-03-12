@@ -4,7 +4,7 @@ from sqlmodel import Session, select, func
 from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, require_teacher_or_admin
-from app.database import get_session
+from app.db.session import get_session
 from app.models.user import User
 from app.models.course import Course
 from app.models.enrollment import Enrollment

@@ -4,9 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser
-from app.database import get_session
+from app.db.session import get_session
 from app.models.user import User
-from app.schemas.user import UserResponse, UserUpdate
+from app.schemas.user import UserResponse, UserUpdate, PasswordChange
+from app.core.security import hash_password, verify_password
 
 router = APIRouter(tags=["users"])
 
@@ -56,3 +57,24 @@ def update_me(
     session.commit()
     session.refresh(current_user)
     return user_to_response(current_user)
+
+
+@router.post("/me/password", status_code=status.HTTP_200_OK)
+def change_password(
+    body: PasswordChange,
+    current_user: CurrentUser,
+    session: Session = Depends(get_session),
+):
+    """Change current user's password. Requires current password verification."""
+    if not verify_password(body.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
+    
+    current_user.password_hash = hash_password(body.new_password)
+    current_user.updated_at = datetime.utcnow()
+    session.add(current_user)
+    session.commit()
+    
+    return {"message": "Password changed successfully"}
