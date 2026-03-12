@@ -53,7 +53,7 @@ export function AdminCommunity() {
               <h3 className="text-gray-800 dark:text-gray-100 text-sm font-medium">{t('Сообщения на модерации', 'Модециядағы хабарламалар')}</h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{t('Ожидают проверки', 'Тексеруді күтуде')}: {moderationPending}</p>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('Мок: очередь', 'Мок: кезек')}</p>
-              <Button size="sm" className="mt-2 rounded-lg h-8 text-xs bg-blue-600 hover:bg-blue-700" onClick={handleCheckQueue}>
+              <Button size="sm" className="mt-2 rounded-lg h-8 text-xs bg-purple-600 hover:bg-purple-700 text-white" onClick={handleCheckQueue}>
                 {t('Проверить очередь', 'Кезекті тексеру')}
               </Button>
             </div>
@@ -68,7 +68,7 @@ export function AdminCommunity() {
               <h3 className="text-gray-800 dark:text-gray-100 text-sm font-medium">{t('Новости платформы', 'Платформа жаңалықтары')}</h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{t('Опубликовано', 'Жарияланды')}: {newsCount}</p>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{t('Мок: создание и публикация', 'Мок: жасау және жариялау')}</p>
-              <Button size="sm" className="mt-2 rounded-lg h-8 text-xs bg-green-600 hover:bg-green-700" onClick={handlePublishNews}>
+              <Button size="sm" className="mt-2 rounded-lg h-8 text-xs bg-purple-600 hover:bg-purple-700 text-white" onClick={handlePublishNews}>
                 {t('Опубликовать новость', 'Жаңалық жариялау')}
               </Button>
             </div>
