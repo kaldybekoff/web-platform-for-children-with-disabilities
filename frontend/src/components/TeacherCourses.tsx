@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Plus, Edit, X, ChevronDown, ChevronRight, Settings, Trash2, Loader2, Play } from 'lucide-react';
+import { BookOpen, Plus, Edit, X, ChevronDown, ChevronRight, Settings, Trash2, Loader2, HelpCircle } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -320,74 +320,114 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
       <div className="space-y-3">
         {myCourses.map((course) => (
           <div key={course.id}>
-            <Card className="p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-100 dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div className="flex items-start sm:items-center gap-2 flex-1 min-w-0">
-                  <button onClick={() => toggleExpandCourse(course.id)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mt-0.5 sm:mt-0 shrink-0">
-                    {expandedCourseId === course.id ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                  </button>
-                  <div className="min-w-0 flex-1">
-                    {editingId === course.id ? (
-                      <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-                        <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="h-8 text-sm w-full sm:w-36 dark:bg-gray-700 dark:border-gray-600" placeholder={t('Название', 'Атауы')} />
-                        <Input value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="h-8 text-sm w-full sm:w-36 dark:bg-gray-700 dark:border-gray-600" placeholder={t('Описание', 'Сипаттама')} />
-                        <select
-                          value={newLevel}
-                          onChange={(e) => setNewLevel(e.target.value)}
-                          className="h-8 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm px-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                          {levelOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {t(option.labelRu, option.labelKz)}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="flex gap-2">
-                          <Button size="sm" className="rounded-lg h-8 text-xs bg-green-600 hover:bg-green-700 flex-1 sm:flex-none" onClick={() => handleSaveEdit(course.id)} disabled={saving}>{t('Сохранить', 'Сақтау')}</Button>
-                          <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs dark:border-gray-600" onClick={() => { setEditingId(null); setNewTitle(''); setNewDesc(''); setNewLevel('beginner'); setNewImageUrl(''); }}><X className="w-3 h-3" /></Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <h3 className="text-gray-800 dark:text-gray-100 text-sm font-medium truncate">{course.title}</h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{lessonCounts[course.id] ?? 0} {t('уроков', 'сабақ')} · {getLevelLabel(course.level)}</p>
-                        {course.description && <p className="text-xs text-gray-500 dark:text-gray-500 truncate">{course.description}</p>}
-                      </>
-                    )}
+            {/* Course card */}
+            <Card className="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-100 dark:border-gray-700">
+              {editingId === course.id ? (
+                /* Inline edit form */
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('Редактирование курса', 'Курсты өңдеу')}</span>
+                    <Button size="sm" variant="outline" className="rounded-lg h-7 text-xs dark:border-gray-600" onClick={() => { setEditingId(null); setNewTitle(''); setNewDesc(''); setNewLevel('beginner'); setNewImageUrl(''); }}>
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="h-9 text-sm dark:bg-gray-700 dark:border-gray-600" placeholder={t('Название', 'Атауы')} />
+                  <Input value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="h-9 text-sm dark:bg-gray-700 dark:border-gray-600" placeholder={t('Описание', 'Сипаттама')} />
+                  <Input value={newImageUrl} onChange={(e) => setNewImageUrl(e.target.value)} className="h-9 text-sm dark:bg-gray-700 dark:border-gray-600" placeholder="https://example.com/image.jpg" />
+                  <select
+                    value={newLevel}
+                    onChange={(e) => setNewLevel(e.target.value)}
+                    style={{ colorScheme: 'dark' }}
+                    className="h-9 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    {levelOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{t(option.labelRu, option.labelKz)}</option>
+                    ))}
+                  </select>
+                  <div className="flex gap-2 pt-1">
+                    <Button size="sm" className="rounded-lg h-9 text-xs bg-green-600 hover:bg-green-700 flex-1" onClick={() => handleSaveEdit(course.id)} disabled={saving}>
+                      {saving ? t('Сохранение...', 'Сақталуда...') : t('Сохранить', 'Сақтау')}
+                    </Button>
+                    <Button size="sm" variant="outline" className="rounded-lg h-9 text-xs dark:border-gray-600" onClick={() => { setEditingId(null); setNewTitle(''); setNewDesc(''); setNewLevel('beginner'); setNewImageUrl(''); }}>
+                      {t('Отмена', 'Болдырмау')}
+                    </Button>
                   </div>
                 </div>
-                {editingId !== course.id && (
-                  <div className="flex flex-wrap gap-1.5 shrink-0">
-                    <Button variant="outline" size="sm" className="rounded-lg h-8 text-xs dark:border-gray-600 dark:hover:bg-gray-700 flex-1 sm:flex-none" onClick={() => { setEditingId(course.id); setNewTitle(course.title); setNewDesc(course.description ?? ''); setNewLevel(course.level); setNewImageUrl(course.image_url ?? ''); }}>
-                      <Edit className="w-3 h-3 mr-1" />
-                      <span className="hidden xs:inline">{t('Редактировать', 'Өңдеу')}</span>
-                      <span className="xs:hidden">{t('Ред.', 'Өңд.')}</span>
-                    </Button>
-                    <Button variant="outline" size="sm" className="rounded-lg h-8 text-xs dark:border-gray-600 dark:hover:bg-gray-700 flex-1 sm:flex-none" onClick={() => setAddingLessonId(course.id)}>
-                      <Plus className="w-3 h-3 mr-1 sm:hidden" />
-                      {t('Добавить урок', 'Сабақ қосу')}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="rounded-lg h-8 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:border-gray-600" 
-                      onClick={() => handleDeleteCourse(course.id)}
-                      disabled={deletingId === course.id}
+              ) : (
+                <div className="flex items-start gap-3">
+                  {/* Course thumbnail */}
+                  {course.image_url ? (
+                    <img src={course.image_url} alt={course.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+                    </div>
+                  )}
+
+                  {/* Info + actions */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Left: title, meta, description */}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{course.title}</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {lessonCounts[course.id] ?? 0} {t('уроков', 'сабақ')} · {getLevelLabel(course.level)}
+                        </p>
+                        {course.description && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{course.description}</p>
+                        )}
+                      </div>
+
+                      {/* Right: action buttons */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-lg h-8 text-xs dark:border-gray-600 dark:hover:bg-gray-700"
+                          onClick={() => { setEditingId(course.id); setNewTitle(course.title); setNewDesc(course.description ?? ''); setNewLevel(course.level); setNewImageUrl(course.image_url ?? ''); }}
+                        >
+                          <Edit className="w-3 h-3 sm:mr-1" />
+                          <span className="hidden sm:inline">{t('Редактировать', 'Өңдеу')}</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-lg h-8 text-xs dark:border-gray-600 dark:hover:bg-gray-700"
+                          onClick={() => { setAddingLessonId(course.id); toggleExpandCourse(course.id); }}
+                        >
+                          <Plus className="w-3 h-3 sm:mr-1" />
+                          <span className="hidden sm:inline">{t('Добавить урок', 'Сабақ қосу')}</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-lg h-8 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:border-gray-600"
+                          onClick={() => handleDeleteCourse(course.id)}
+                          disabled={deletingId === course.id}
+                        >
+                          {deletingId === course.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Expand toggle */}
+                    <button
+                      onClick={() => toggleExpandCourse(course.id)}
+                      className="mt-2.5 flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 transition-colors"
                     >
-                      {deletingId === course.id ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3 h-3" />
-                      )}
-                    </Button>
+                      {expandedCourseId === course.id
+                        ? <ChevronDown className="w-3.5 h-3.5" />
+                        : <ChevronRight className="w-3.5 h-3.5" />}
+                      {t('Уроки', 'Сабақтар')} ({lessonCounts[course.id] ?? 0})
+                    </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </Card>
 
-            {/* Expanded lessons list - left aligned */}
+            {/* Lessons list */}
             {expandedCourseId === course.id && (
-              <div className="ml-2 sm:ml-6 mt-1 border-l-2 border-purple-200 dark:border-purple-700 pl-2 sm:pl-4 space-y-1">
+              <div className="mt-1.5 space-y-1 pl-2">
                 {(courseLessons[course.id] || []).map((lesson) => (
                   <div key={lesson.id}>
                     {editingLessonId === lesson.id ? (
@@ -397,77 +437,77 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                         onSaved={() => loadCourseLessons(course.id)}
                       />
                     ) : (
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 py-2 px-2 sm:px-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 transition-colors group">
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                          <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-semibold shrink-0">
+                      <div className="flex items-center justify-between gap-2 py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
+                        {/* Left: number + name + type */}
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <span className="w-6 h-6 rounded-md bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 flex items-center justify-center text-xs font-bold shrink-0">
                             {lesson.order + 1}
                           </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{lesson.title}</p>
-                            <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-0.5">
-                              {lesson.video_url && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">
-                                  📹 <span className="hidden sm:inline">{t('Видео', 'Видео')}</span>
-                                </span>
-                              )}
-                              {lesson.has_sign_language && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400">
-                                  🤟 <span className="hidden sm:inline">{t('Жестовый', 'Ым тілі')}</span>
-                                </span>
-                              )}
-                              {!lesson.video_url && !lesson.has_sign_language && (
-                                <span className="text-xs text-gray-400 dark:text-gray-500">{t('Текст', 'Мәтін')}</span>
-                              )}
-                            </div>
-                          </div>
+                          <span className="text-sm text-gray-800 dark:text-gray-100 truncate font-medium">{lesson.title}</span>
+                          {lesson.video_url && (
+                            <span className="hidden sm:inline px-1.5 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 shrink-0">
+                              {t('Видео', 'Видео')}
+                            </span>
+                          )}
+                          {lesson.has_sign_language && (
+                            <span className="hidden sm:inline px-1.5 py-0.5 rounded text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-400 shrink-0">
+                              {t('Жестовый', 'Ым тілі')}
+                            </span>
+                          )}
+                          {!lesson.video_url && !lesson.has_sign_language && (
+                            <span className="hidden sm:inline px-1.5 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-600/60 text-gray-500 dark:text-gray-400 shrink-0">
+                              {t('Текст', 'Мәтін')}
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0 sm:opacity-70 group-hover:opacity-100 transition-opacity">
+
+                        {/* Right: Редактировать, Квиз, Удалить */}
+                        <div className="flex items-center gap-1 shrink-0">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="rounded-lg h-7 sm:h-8 text-xs text-purple-600 dark:text-purple-400 dark:border-gray-500 dark:hover:bg-gray-700 flex-1 sm:flex-none"
-                            onClick={() => onOpenLesson(course.id, lesson.id)}
-                          >
-                            <Play className="w-3.5 h-3.5 sm:mr-1.5" />
-                            <span className="hidden sm:inline">{t('Просмотр', 'Қарау')}</span>
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-lg h-7 sm:h-8 text-xs dark:border-gray-500 dark:hover:bg-gray-700 flex-1 sm:flex-none"
+                            className="rounded-lg h-7 text-xs dark:border-gray-500 dark:hover:bg-gray-600"
                             onClick={() => setEditingLessonId(lesson.id)}
                           >
-                            <Settings className="w-3.5 h-3.5 sm:mr-1.5" />
-                            <span className="hidden sm:inline">{t('Настроить', 'Баптау')}</span>
+                            <Settings className="w-3 h-3 sm:mr-1" />
+                            <span className="hidden sm:inline">{t('Редактировать', 'Өңдеу')}</span>
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="rounded-lg h-7 sm:h-8 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:border-gray-500"
+                            className="rounded-lg h-7 text-xs text-blue-600 dark:text-blue-400 dark:border-gray-500 dark:hover:bg-gray-600"
+                            onClick={() => onOpenLesson(course.id, lesson.id)}
+                          >
+                            <HelpCircle className="w-3 h-3 sm:mr-1" />
+                            <span className="hidden sm:inline">{t('Квиз', 'Квиз')}</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-lg h-7 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:border-gray-500"
                             onClick={() => handleDeleteLesson(lesson.id, course.id)}
                             disabled={deletingLessonId === lesson.id}
                           >
-                            {deletingLessonId === lesson.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-3.5 h-3.5" />
-                            )}
+                            {deletingLessonId === lesson.id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <Trash2 className="w-3 h-3" />}
                           </Button>
                         </div>
                       </div>
                     )}
                   </div>
                 ))}
-                {(courseLessons[course.id] || []).length === 0 && (
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 py-2 sm:py-3 px-2 sm:px-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                {(courseLessons[course.id] || []).length === 0 && !addingLessonId && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 py-3 px-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
                     {t('Уроков пока нет. Нажмите «Добавить урок».', 'Сабақтар жоқ. «Сабақ қосу» басыңыз.')}
                   </p>
                 )}
               </div>
             )}
 
+            {/* Add lesson inline form */}
             {addingLessonId === course.id && (
-              <Card className="p-3 mt-2 rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-900/20">
+              <Card className="p-3 mt-1.5 ml-2 rounded-lg border border-purple-200 dark:border-purple-700 bg-purple-50/50 dark:bg-purple-900/20">
                 <div className="flex gap-2 items-center flex-wrap">
                   <Input value={newLessonTitle} onChange={(e) => setNewLessonTitle(e.target.value)} placeholder={t('Название урока', 'Сабақ атауы')} className="h-8 text-sm flex-1 min-w-[160px] dark:bg-gray-700 dark:border-gray-600" />
                   <Button size="sm" className="rounded-lg h-8 text-xs bg-purple-600 hover:bg-purple-700" onClick={() => handleAddLesson(course.id)} disabled={saving}>{t('Добавить', 'Қосу')}</Button>
