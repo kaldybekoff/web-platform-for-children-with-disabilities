@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlmodel import Session, select, func
 
-from app.api.deps import CurrentUser
+from app.api.deps import CurrentUser, user_to_response
 from app.db.session import get_session
 from app.models.user import User
 from app.models.enrollment import Enrollment
@@ -39,18 +39,6 @@ class StudyFriendResponse(BaseModel):
 class StudyFriendsListResponse(BaseModel):
     friends: list[StudyFriendResponse]
     total: int
-
-
-def user_to_response(user: User) -> UserResponse:
-    return UserResponse(
-        id=user.id,
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        role=user.role,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
 
 
 @router.get("/me", response_model=UserResponse)

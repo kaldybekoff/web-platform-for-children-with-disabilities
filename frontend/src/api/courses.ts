@@ -5,12 +5,14 @@ export interface CourseCreate {
   title: string;
   description?: string;
   level?: string;
+  image_url?: string | null;
 }
 
 export interface CourseUpdate {
   title?: string;
   description?: string;
   level?: string;
+  image_url?: string | null;
 }
 
 export async function listCourses(): Promise<CourseResponse[]> {

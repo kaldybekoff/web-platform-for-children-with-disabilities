@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
-from app.api.deps import CurrentUser, require_teacher_or_admin
+from app.api.deps import CurrentUser, require_teacher_or_admin, is_enrolled
 from app.db.session import get_session
 from app.models.course import Course
 from app.models.lesson import Lesson
@@ -39,18 +39,6 @@ def _can_manage_quiz(user: User, lesson: Lesson, session: Session) -> bool:
         return course and course.teacher_id == user.id
     return False
 
-
-def _is_enrolled(user: User, course_id: int, session: Session) -> bool:
-    """Check if student is enrolled in the course."""
-    if user.role in ("teacher", "admin"):
-        return True
-    enrollment = session.exec(
-        select(Enrollment).where(
-            Enrollment.student_id == user.id,
-            Enrollment.course_id == course_id
-        )
-    ).first()
-    return enrollment is not None
 
 
 def _build_quiz_response(quiz: Quiz, session: Session) -> QuizResponse:
@@ -161,7 +149,7 @@ def get_quiz_by_lesson(
     """Get quiz for a lesson. Returns full quiz for teacher/admin, limited for students."""
     lesson = _get_lesson_with_access_check(lesson_id, current_user, session)
     
-    if not _is_enrolled(current_user, lesson.course_id, session):
+    if not is_enrolled(current_user, lesson.course_id, session):
         raise HTTPException(status_code=403, detail="Not enrolled in this course")
     
     quiz = session.exec(select(Quiz).where(Quiz.lesson_id == lesson_id)).first()
@@ -451,7 +439,7 @@ def check_answer(
     
     quiz = session.get(Quiz, question.quiz_id)
     lesson = session.get(Lesson, quiz.lesson_id)
-    if not _is_enrolled(current_user, lesson.course_id, session):
+    if not is_enrolled(current_user, lesson.course_id, session):
         raise HTTPException(status_code=403, detail="Not enrolled in this course")
     
     # Get selected answer
@@ -485,7 +473,7 @@ def submit_quiz(
         raise HTTPException(status_code=404, detail="Quiz not found")
     
     lesson = session.get(Lesson, quiz.lesson_id)
-    if not _is_enrolled(current_user, lesson.course_id, session):
+    if not is_enrolled(current_user, lesson.course_id, session):
         raise HTTPException(status_code=403, detail="Not enrolled in this course")
     
     # Get all questions

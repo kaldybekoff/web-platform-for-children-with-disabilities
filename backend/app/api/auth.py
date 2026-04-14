@@ -5,20 +5,9 @@ from app.db.session import get_session
 from app.models.user import User
 from app.schemas.user import TokenResponse, UserCreate, UserLogin, UserResponse
 from app.core.security import hash_password, verify_password, create_access_token
+from app.api.deps import user_to_response
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-
-def user_to_response(user: User) -> UserResponse:
-    return UserResponse(
-        id=user.id,
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        role=user.role,
-        created_at=user.created_at,
-        updated_at=user.updated_at,
-    )
 
 
 @router.post("/register", response_model=UserResponse)

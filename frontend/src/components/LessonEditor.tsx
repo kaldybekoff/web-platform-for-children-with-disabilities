@@ -31,6 +31,7 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
   const [subtitleUrl, setSubtitleUrl] = useState('');
   const [hasSignLanguage, setHasSignLanguage] = useState(false);
   const [durationSeconds, setDurationSeconds] = useState<number | ''>('');
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     loadLesson();
@@ -47,6 +48,7 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
       setSubtitleUrl(data.subtitle_url || '');
       setHasSignLanguage(data.has_sign_language);
       setDurationSeconds(data.duration_seconds || '');
+      setIsDemo(data.is_demo ?? false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка загрузки');
     } finally {
@@ -71,6 +73,7 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
         subtitle_url: subtitleUrl.trim() || null,
         has_sign_language: hasSignLanguage,
         duration_seconds: durationSeconds ? Number(durationSeconds) : null,
+        is_demo: isDemo,
       });
       showSuccess(t('Урок сохранен', 'Сабақ сақталды'));
       onSaved?.();
@@ -180,6 +183,16 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
                   <Hand className="w-4 h-4" />
                   {t('С жестовым переводом', 'Ым тілі аудармасымен')}
                 </span>
+              </label>
+
+              <label className="flex items-center gap-2 pb-1">
+                <input
+                  type="checkbox"
+                  checked={isDemo}
+                  onChange={(e) => setIsDemo(e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm">{t('Демо-урок', 'Демо сабақ')}</span>
               </label>
             </div>
           </div>

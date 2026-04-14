@@ -103,7 +103,15 @@ function AppContent() {
       {userRole === 'teacher' && (
         <>
           {activeSection === 'home' && <TeacherHome setActiveSection={setActiveSection} />}
-          {activeSection === 'courses' && <TeacherCourses />}
+          {activeSection === 'courses' && <TeacherCourses onOpenLesson={openLesson} />}
+          {activeSection === 'lesson' && (
+            <InteractiveLessonDemo
+              courseId={selectedCourseId}
+              lessonId={selectedLessonId}
+              setActiveSection={setActiveSection}
+              onSelectLesson={setSelectedLessonId}
+            />
+          )}
           {activeSection === 'students' && <TeacherStudents />}
           {activeSection === 'profile' && <TeacherProfile setActiveSection={setActiveSection} />}
           {activeSection === 'community' && <CommunityPage />}

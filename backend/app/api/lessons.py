@@ -23,6 +23,7 @@ def lesson_to_response(lesson: Lesson) -> LessonResponse:
         subtitle_url=lesson.subtitle_url,
         has_sign_language=lesson.has_sign_language,
         duration_seconds=lesson.duration_seconds,
+        is_demo=lesson.is_demo,
         created_at=lesson.created_at,
         updated_at=lesson.updated_at,
     )
@@ -83,6 +84,7 @@ def create_lesson(
         subtitle_url=body.subtitle_url,
         has_sign_language=body.has_sign_language,
         duration_seconds=body.duration_seconds,
+        is_demo=body.is_demo,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -121,6 +123,8 @@ def update_lesson(
         lesson.has_sign_language = body.has_sign_language
     if body.duration_seconds is not None:
         lesson.duration_seconds = body.duration_seconds
+    if body.is_demo is not None:
+        lesson.is_demo = body.is_demo
     lesson.updated_at = datetime.utcnow()
     session.add(lesson)
     session.commit()

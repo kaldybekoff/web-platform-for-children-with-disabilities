@@ -166,11 +166,17 @@ export function CoursesSection({ setActiveSection, onOpenLesson }: CoursesSectio
                 }`}
               >
                 <div className="relative aspect-video bg-gradient-to-br from-purple-200 to-blue-200 dark:from-purple-700 dark:to-blue-700">
-                  <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600"
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                  />
+                  {course.image_url ? (
+                    <ImageWithFallback
+                      src={course.image_url}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <BookOpen className="w-12 h-12 text-purple-400 dark:text-purple-300 opacity-50" />
+                    </div>
+                  )}
                   <div className="absolute top-3 right-3 bg-purple-600 dark:bg-purple-700 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
                     <span className="text-lg">👋</span>
                     <span>{t('Жесты', 'Ымдар')}</span>

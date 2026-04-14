@@ -54,6 +54,7 @@ export interface CourseResponse {
   description: string;
   level: string;
   teacher_id: number;
+  image_url: string | null;
   created_at: string;
 }
 

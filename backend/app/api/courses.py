@@ -2,9 +2,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
-from app.api.deps import CurrentUser, require_teacher_or_admin
+from app.api.deps import CurrentUser, require_teacher
 from app.db.session import get_session
 from app.models.course import Course
+from app.models.lesson import Lesson
+from app.models.lesson_progress import LessonProgress
+from app.models.enrollment import Enrollment
+from app.models.quiz import Quiz, Question, Answer, QuizAttempt
 from app.models.user import User
 from app.schemas.course import CourseCreate, CourseResponse, CourseUpdate
 
@@ -18,13 +22,14 @@ def course_to_response(course: Course) -> CourseResponse:
         description=course.description,
         level=course.level,
         teacher_id=course.teacher_id,
+        image_url=course.image_url,
         created_at=course.created_at,
     )
 
 
 def _can_manage_course(user: User, course: Course) -> bool:
-    """True if user can update/delete this course (owner or admin)."""
-    return user.role == "admin" or course.teacher_id == user.id
+    """True if user can update/delete this course (owner teacher only)."""
+    return user.role == "teacher" and course.teacher_id == user.id
 
 
 @router.get("/courses", response_model=list[CourseResponse])
@@ -56,12 +61,13 @@ def create_course(
     current_user: CurrentUser,
     session: Session = Depends(get_session),
 ):
-    """Create a course. Teacher or admin only."""
-    require_teacher_or_admin(current_user)
+    """Create a course. Teacher only."""
+    require_teacher(current_user)
     course = Course(
         title=body.title,
         description=body.description,
         level=body.level,
+        image_url=body.image_url,
         teacher_id=current_user.id,
     )
     session.add(course)
@@ -89,6 +95,8 @@ def update_course(
         course.description = body.description
     if body.level is not None:
         course.level = body.level
+    if body.image_url is not None:
+        course.image_url = body.image_url
     session.add(course)
     session.commit()
     session.refresh(course)
@@ -107,5 +115,27 @@ def delete_course(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
     if not _can_manage_course(current_user, course):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete this course")
+
+    # Delete all dependent data in strict order, flushing each step
+    lessons = session.exec(select(Lesson).where(Lesson.course_id == course_id)).all()
+    for lesson in lessons:
+        for lp in session.exec(select(LessonProgress).where(LessonProgress.lesson_id == lesson.id)).all():
+            session.delete(lp)
+        quiz = session.exec(select(Quiz).where(Quiz.lesson_id == lesson.id)).first()
+        if quiz:
+            for attempt in session.exec(select(QuizAttempt).where(QuizAttempt.quiz_id == quiz.id)).all():
+                session.delete(attempt)
+            for question in session.exec(select(Question).where(Question.quiz_id == quiz.id)).all():
+                for answer in session.exec(select(Answer).where(Answer.question_id == question.id)).all():
+                    session.delete(answer)
+                session.delete(question)
+            session.delete(quiz)
+        session.delete(lesson)
+    session.flush()  # commit lessons + their children first
+
+    for enrollment in session.exec(select(Enrollment).where(Enrollment.course_id == course_id)).all():
+        session.delete(enrollment)
+    session.flush()  # commit enrollments before deleting course
+
     session.delete(course)
     session.commit()

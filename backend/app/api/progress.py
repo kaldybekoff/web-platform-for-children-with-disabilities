@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 
-from app.api.deps import CurrentUser
+from app.api.deps import CurrentUser, is_enrolled
 from app.db.session import get_session
 from app.models.lesson import Lesson
 from app.models.lesson_progress import LessonProgress
@@ -13,16 +13,6 @@ from app.models.course import Course
 from app.schemas.progress import LessonProgressResponse, MarkLessonComplete
 
 router = APIRouter(tags=["progress"])
-
-
-def _is_enrolled(user_id: int, course_id: int, session: Session) -> bool:
-    enrollment = session.exec(
-        select(Enrollment).where(
-            Enrollment.student_id == user_id,
-            Enrollment.course_id == course_id
-        )
-    ).first()
-    return enrollment is not None
 
 
 def _update_course_progress(student_id: int, course_id: int, session: Session) -> None:
@@ -72,7 +62,7 @@ def mark_lesson_complete(
         raise HTTPException(status_code=404, detail="Lesson not found")
     
     # Check enrollment (students must be enrolled, teachers/admins can complete any)
-    if current_user.role == "student" and not _is_enrolled(current_user.id, lesson.course_id, session):
+    if not is_enrolled(current_user, lesson.course_id, session):
         raise HTTPException(status_code=403, detail="Not enrolled in this course")
     
     # Get or create progress record

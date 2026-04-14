@@ -10,6 +10,7 @@ export interface LessonCreate {
   subtitle_url?: string | null;
   has_sign_language?: boolean;
   duration_seconds?: number | null;
+  is_demo?: boolean;
 }
 
 export interface LessonUpdate {
@@ -20,6 +21,7 @@ export interface LessonUpdate {
   subtitle_url?: string | null;
   has_sign_language?: boolean;
   duration_seconds?: number | null;
+  is_demo?: boolean;
 }
 
 export async function listLessonsByCourse(courseId: number): Promise<LessonResponse[]> {

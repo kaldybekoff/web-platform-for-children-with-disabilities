@@ -9,6 +9,7 @@ class CourseCreate(BaseModel):
     title: str
     description: str = ""
     level: str = "beginner"
+    image_url: str | None = None
 
 
 class CourseUpdate(BaseModel):
@@ -17,6 +18,7 @@ class CourseUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     level: str | None = None
+    image_url: str | None = None
 
 
 class CourseResponse(BaseModel):
@@ -27,6 +29,7 @@ class CourseResponse(BaseModel):
     description: str
     level: str
     teacher_id: int
+    image_url: str | None = None
     created_at: datetime
 
     class Config:
