@@ -24,13 +24,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Permissive CSP that allows the React SPA + external media (YouTube, images)
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             "img-src 'self' data: https:; "
             "media-src 'self' https:; "
             "frame-src https://www.youtube.com; "
             "connect-src 'self' https:; "
-            "font-src 'self' data:;"
+            "font-src 'self' data: https://cdn.jsdelivr.net;"
         )
         return response
 
