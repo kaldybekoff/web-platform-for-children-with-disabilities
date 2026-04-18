@@ -1,47 +1,45 @@
 # SECURITY.md
 
-Документ описывает реальные меры безопасности в проекте **QazEdu Special**. Только фактически реализованные механизмы.
+Фактически реализованные меры безопасности в **QazEdu Special**.
 
-## 1. Аутентификация
+## 1. Аутентификация — JWT
 
-### JWT
-
-- Токен создаётся в `backend/app/core/security.py` через `python-jose`.
-- Поля: `sub` (ID пользователя), `exp` (срок истечения).
-- Подписывается `SECRET_KEY` (алгоритм HS256).
-- `get_current_user` в `backend/app/api/deps.py` декодирует токен при каждом запросе.
-- При невалидном токене — 401 с заголовком `WWW-Authenticate: Bearer`.
-
-### Email верификация
-
-- При регистрации генерируется `verification_token` (UUID), сохраняется в БД с TTL 24 часа.
-- Письмо отправляется через `aiosmtplib` (`backend/app/core/email.py`).
-- Логин невозможен без подтверждения email (`is_verified=False` → 403).
-- Эндпоинт `/api/auth/resend-verification` с rate limit 3/мин.
-
-### Google OAuth
-
-- Реализован через `authlib` + `SessionMiddleware` (itsdangerous).
-- Флоу: `/api/auth/google` → Google → `/api/auth/google/callback`.
-- При первом входе создаётся аккаунт с `is_verified=True`, при повторном — выдаётся токен.
-- Redirect URI должен быть зарегистрирован в Google Cloud Console.
-
-### Сброс пароля
-
-- `/api/auth/forgot-password` генерирует `reset_token` (UUID) с TTL 1 час, отправляет письмо.
-- `/api/auth/reset-password` проверяет токен, устанавливает новый хэш пароля.
-- После использования токен обнуляется.
+- Токен создаётся в `backend/app/core/security.py` через `python-jose` (алгоритм HS256).
+- Поля токена: `sub` (ID пользователя), `exp` (7 дней).
+- Подписывается `SECRET_KEY` из переменных окружения.
+- `get_current_user` в `backend/app/api/deps.py` декодирует и проверяет токен на каждом защищённом запросе.
+- При невалидном или отсутствующем токене — 401 с заголовком `WWW-Authenticate: Bearer`.
 
 ## 2. Безопасность паролей
 
-- Хранится только `password_hash` (bcrypt), пароль никогда не возвращается в ответах API.
+- Хранится только `password_hash` (bcrypt), пароль никогда не возвращается в ответах.
 - `hash_password` / `verify_password` в `backend/app/core/security.py`.
-- Усечение до 72 байт (`MAX_PASSWORD_BYTES`) для корректной работы bcrypt.
-- Google OAuth пользователи не имеют пароля (`password_hash=None`).
+- Усечение до 72 байт (`MAX_PASSWORD_BYTES`) — предотвращает некорректную работу bcrypt с длинными паролями.
+- Google OAuth пользователи создаются без пароля (`password_hash=None`).
 
-## 3. Rate Limiting (slowapi)
+## 3. Email верификация
 
-Реализован через `slowapi` в `backend/app/core/limiter.py`, применяется в `backend/app/api/auth.py`:
+- При регистрации генерируется `verification_token` (случайный, URL-safe), TTL 24 часа.
+- Вход невозможен без подтверждения email (`is_verified=False` → 403).
+- После верификации токен обнуляется, `is_verified=True`.
+- Повторная отправка ограничена: 3 запроса/мин.
+
+## 4. Сброс пароля
+
+- `POST /api/auth/forgot-password` — всегда возвращает 200 (защита от перебора email).
+- Генерируется `reset_token` с TTL 1 час.
+- После использования токен обнуляется.
+- Ограничение: 3 запроса/мин на forgot, 5/мин на reset.
+
+## 5. Google OAuth
+
+- Реализован через `authlib` + `SessionMiddleware` (itsdangerous).
+- Google OAuth пользователи сразу `is_verified=True`.
+- Redirect URI проверяется на стороне Google.
+
+## 6. Rate Limiting (slowapi)
+
+Реализован в `backend/app/core/limiter.py`, применяется в `backend/app/api/auth.py`:
 
 | Endpoint | Лимит |
 |----------|-------|
@@ -49,10 +47,11 @@
 | `POST /api/auth/login` | 10 запросов/мин |
 | `POST /api/auth/resend-verification` | 3 запроса/мин |
 | `POST /api/auth/forgot-password` | 3 запроса/мин |
+| `POST /api/auth/reset-password` | 5 запросов/мин |
 
 При превышении — 429 Too Many Requests.
 
-## 4. Security Headers (XSS защита)
+## 7. Security Headers (XSS защита)
 
 `SecurityHeadersMiddleware` в `backend/app/main.py` добавляет заголовки ко всем ответам:
 
@@ -62,13 +61,13 @@
 | `X-Frame-Options` | `DENY` |
 | `X-XSS-Protection` | `1; mode=block` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
-| `Content-Security-Policy` | ограничивает источники скриптов, стилей, фреймов |
+| `Content-Security-Policy` | скрипты, стили, фреймы — ограничены по источникам |
 
-CSP разрешает: `'self'`, `'unsafe-inline'`, `'unsafe-eval'`, `cdn.jsdelivr.net` (для Swagger UI), YouTube фреймы.
+CSP разрешает: `'self'`, `cdn.jsdelivr.net` (Swagger UI), YouTube фреймы, HTTPS источники для медиа.
 
-## 5. Роли и авторизация
+## 8. Роли и авторизация
 
-Три роли: `student`, `teacher`, `admin` (поле `role` в модели `User`).
+Три роли: `student`, `teacher`, `admin`.
 
 Функции в `backend/app/api/deps.py`:
 - `require_teacher_or_admin` — 403 если не teacher/admin
@@ -83,31 +82,38 @@ CSP разрешает: `'self'`, `'unsafe-inline'`, `'unsafe-eval'`, `cdn.jsdel
 | Управление новостями | только admin |
 | `/api/ai/chat` | любой аутентифицированный |
 
-## 6. CORS
+## 9. CORS
 
 `CORSMiddleware` в `backend/app/main.py`:
 - `allow_origins` — из `CORS_ORIGINS` в `.env` (через запятую)
 - `allow_credentials=True`, `allow_methods=["*"]`, `allow_headers=["*"]`
 
-В продакшене `CORS_ORIGINS` должен содержать только домен фронтенда.
+По умолчанию: `http://localhost:5173, http://localhost:3000`
 
-## 7. Валидация входных данных
+## 10. Валидация входных данных
 
 - Все входные данные типизированы через Pydantic-схемы (`backend/app/schemas/*.py`).
 - Уникальность email проверяется при регистрации.
 - Запрет пустого контента в постах сообщества.
-- Запрет повторного создания квиза для урока.
+- Запрет повторного создания квиза для одного урока.
 - Проверка принадлежности ответов к вопросу при сдаче квиза.
+- ORM (SQLModel) использует параметризованные запросы — SQL-инъекции исключены.
 
-## 8. Переменные окружения и секреты
+## 11. Переменные окружения и секреты
 
 - Все секреты загружаются через `pydantic-settings` из `.env`.
-- `.env` и все `*.env.*` файлы в `.gitignore`.
+- `.env` и все `*.env.*` в `.gitignore` — не попадают в репозиторий.
 - `SECRET_KEY` обязателен — без него приложение не стартует.
 - При пустом `GEMINI_API_KEY` — `/api/ai/chat` возвращает 503.
 - На фронтенде нет секретов — только `VITE_API_URL`.
 
-## 9. Фронтенд
+## 12. Email сервис
+
+Приоритет отправки: **Brevo → Resend → SMTP**.
+- Если ни один не настроен — email верификация отключена, `is_verified=True` при регистрации.
+- Ошибки отправки логируются но не блокируют регистрацию (фоновая задача).
+
+## 13. Фронтенд
 
 - Токен хранится в `localStorage` (стандарт для SPA).
 - `Authorization: Bearer <token>` добавляется централизованно в `frontend/src/api/client.ts`.
@@ -115,12 +121,12 @@ CSP разрешает: `'self'`, `'unsafe-inline'`, `'unsafe-eval'`, `cdn.jsdel
 - Ролевая защита UI (admin/teacher страницы) — дополнительный слой, основная защита на backend.
 - Google OAuth callback обрабатывается через URL параметры (`?auth_token=`, `?auth_error=`).
 
-## 10. Ограничения
+## 14. Ограничения
 
-- Нет refresh-токенов — только один JWT без механизма обновления.
-- `localStorage` для токена уязвим к XSS (нет HTTP-only cookies).
-- Нет CSRF-токенов (Bearer-токен частично защищает, но не полностью).
-- Нет проверки сложности пароля (длина, символы, словарные пароли).
-- Нет аудита безопасности (логин/логаут/смена пароля не логируются отдельно).
+- Нет refresh-токенов — только один JWT, без механизма обновления.
+- `localStorage` уязвим к XSS — нет HTTP-only cookies.
+- Нет CSRF-токенов (Bearer-токен частично защищает).
+- Нет проверки сложности пароля на backend (только на фронте).
+- Нет аудита действий (логин/смена пароля не логируются в отдельный журнал).
 - Нет rate limit на `/api/ai/chat`.
-- Нет soft delete — все удаления физические.
+- Все удаления физические — нет soft delete.
