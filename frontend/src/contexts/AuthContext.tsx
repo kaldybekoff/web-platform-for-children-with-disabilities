@@ -17,6 +17,7 @@ interface AuthContextValue extends AuthState {
   userRole: UserRole;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; password: string; name: string; role: UserRole }) => Promise<void>;
+  loginWithToken: (token: string) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -90,11 +91,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         last_name,
         role: data.role,
       });
-      const res = await authApi.login({ email: data.email, password: data.password });
-      persist(res.access_token, res.user);
+      // Do NOT auto-login: user must verify email before accessing the platform.
     },
-    [persist]
+    []
   );
+
+  const loginWithToken = useCallback((token: string) => {
+    // Persist token without user; the useEffect will call /me and fill user data.
+    persist(token, null);
+  }, [persist]);
 
   const logout = useCallback(() => {
     persist(null, null);
@@ -108,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userRole: user?.role ?? 'student',
     login,
     register,
+    loginWithToken,
     logout,
     refreshUser,
   };

@@ -36,6 +36,7 @@ def seed_admin(session: Session) -> None:
         first_name=settings.admin_first_name,
         last_name=settings.admin_last_name,
         role="admin",
+        is_verified=True,
     )
     
     session.add(admin_user)

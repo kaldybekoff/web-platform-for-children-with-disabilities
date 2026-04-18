@@ -15,6 +15,7 @@ from app.models import (  # noqa: F401
     Answer,
     QuizAttempt,
     LessonProgress,
+    News,
     SuccessPost,
     SuccessPostLike,
 )

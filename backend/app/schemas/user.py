@@ -104,3 +104,34 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class RegisterResponse(BaseModel):
+    """Response for successful registration (email verification pending)."""
+
+    message: str
+    email: str
+
+
+class ResendVerificationRequest(BaseModel):
+    """Request body for resending a verification email."""
+
+    email: EmailStr
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Request body for initiating password reset."""
+
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """Request body for completing password reset."""
+
+    token: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        return validate_password_strength(v)
