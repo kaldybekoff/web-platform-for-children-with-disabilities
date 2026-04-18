@@ -11,7 +11,7 @@
 | Frontend | React 18, TypeScript, Vite, Tailwind CSS, Radix UI, shadcn/ui |
 | Backend | FastAPI, SQLModel, PostgreSQL / SQLite, Alembic |
 | Аутентификация | JWT (HS256), bcrypt, email‑верификация, Google OAuth (authlib) |
-| Email | Brevo API / Resend API / SMTP (Gmail) — приоритет по порядку |
+| Email | SMTP (Gmail App Password) |
 | Безопасность | slowapi (rate limiting), CSP/XSS headers, SessionMiddleware |
 | AI | Google Gemini API |
 | Контейнеризация | Docker + docker-compose |
@@ -100,19 +100,10 @@ ADMIN_LAST_NAME=Admin
 # AI (опционально)
 GEMINI_API_KEY=твой-ключ
 
-# Email — выбери один из трёх вариантов:
-
-# Вариант 1: Brevo (рекомендуется — любой получатель, 300/день бесплатно)
-BREVO_API_KEY=твой-ключ
-SMTP_FROM_EMAIL=твой@email.com
-
-# Вариант 2: Gmail SMTP
+# Email (Gmail SMTP — App Password)
 SMTP_USERNAME=твой@gmail.com
 SMTP_PASSWORD=app-password-16-символов
 SMTP_FROM_EMAIL=твой@gmail.com
-
-# Вариант 3: Resend (только на email аккаунта без домена)
-RESEND_API_KEY=твой-ключ
 
 # Google OAuth (опционально)
 GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
