@@ -150,7 +150,7 @@ async def send_password_reset_email(to_email: str, name: str, token: str) -> Non
 
 async def send_verification_email(to_email: str, name: str, token: str) -> None:
     """Send email-verification letter. Raises on SMTP failure."""
-    verify_url = f"{settings.frontend_url.rstrip('/')}/api/auth/verify?token={token}"
+    verify_url = f"{settings.backend_url.rstrip('/')}/api/auth/verify?token={token}"
 
     html = _VERIFICATION_HTML.format(name=name or to_email, url=verify_url)
 
