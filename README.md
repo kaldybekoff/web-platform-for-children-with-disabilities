@@ -1,24 +1,63 @@
 # QazEdu Special
 
-**Сайт:** https://web-platform-for-children-with-disabilities-13auzqlf4.vercel.app
+**Веб-сайт:** https://qazedu.vercel.app  
+**API:** https://qazedu.onrender.com  
+**Документация API (Swagger):** https://qazedu.onrender.com/docs
 
-Инклюзивная образовательная платформа для глухих и слабослышащих детей с поддержкой видеоуроков, субтитров и жестового языка.
+Инклюзивная образовательная платформа для глухих и слабослышащих детей. Платформа обеспечивает доступ к видеоурокам с субтитрами и поддержкой жестового языка, позволяет отслеживать прогресс обучения и взаимодействовать с AI-ассистентом.
+
+---
+
+## Бизнес-логика
+
+Платформа поддерживает три роли пользователей с чёткими границами прав доступа.
+
+### Студент
+- Регистрация с подтверждением email, вход через Google OAuth
+- Запись на курсы и прохождение видеоуроков
+- Выполнение тестов с мгновенной проверкой ответов
+- Отслеживание прогресса по курсам и урокам
+- Просмотр статистики достижений
+- Публикация и лайки в ленте успехов сообщества
+- Диалог с AI-ассистентом (Google Gemini)
+
+### Преподаватель
+- Создание и редактирование курсов, уроков, тестов
+- Прикрепление видео, субтитров, отметки поддержки жестового языка
+- Просмотр прогресса и статистики квизов студентов
+
+### Администратор
+- Управление пользователями: просмотр, смена роли, удаление
+- Управление всеми курсами платформы
+- Публикация новостей (двуязычно: русский / казахский)
+- Просмотр статистики платформы
+
+### Пользовательский путь
+1. Регистрация → подтверждение email (ссылка, TTL 24 ч) → вход
+2. Выбор курса → запись → просмотр уроков с видео и субтитрами
+3. Прохождение теста → мгновенная проверка ответов → отображение результата
+4. Автоматическое обновление прогресса по курсу
+
+---
 
 ## Технологии
 
 | Компонент | Стек |
 |-----------|------|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Radix UI, shadcn/ui |
-| Backend | FastAPI, SQLModel, PostgreSQL / SQLite, Alembic |
-| Аутентификация | JWT (HS256), bcrypt, email‑верификация, Google OAuth (authlib) |
-| Email | SMTP (Gmail App Password) |
-| Безопасность | slowapi (rate limiting), CSP/XSS headers, SessionMiddleware |
-| AI | Google Gemini API |
-| Контейнеризация | Docker + docker-compose |
+| Frontend | React 18.3.1, TypeScript, Vite 6.3.5, Radix UI, Tailwind CSS, shadcn/ui |
+| Backend | FastAPI 0.115.6, SQLModel 0.0.22, Alembic 1.14.0, Uvicorn 0.32.1 |
+| База данных | PostgreSQL (Neon) / SQLite (локально) |
+| Аутентификация | JWT HS256 (python-jose), bcrypt, Google OAuth2 (authlib) |
+| Email | Resend API (production), SMTP Gmail (локально) |
+| AI | Google Gemini API (google-genai) |
+| Безопасность | slowapi (rate limiting), SecurityHeadersMiddleware, SessionMiddleware |
+| Контейнеризация | Docker, docker-compose |
+
+---
 
 ## Структура проекта
 
-```text
+```
 web-platform-for-children-with-disabilities/
 ├── docker-compose.yml
 ├── backend/
@@ -26,25 +65,138 @@ web-platform-for-children-with-disabilities/
 │   ├── requirements.txt
 │   ├── alembic/                  # Миграции БД
 │   └── app/
-│       ├── main.py               # FastAPI app, middleware, роуты
-│       ├── api/                  # auth, users, courses, lessons, enrollments,
-│       │                         # quizzes, progress, admin, teacher, news, community, ai
+│       ├── main.py               # FastAPI приложение, middleware
+│       ├── api/                  # Роутеры: auth, users, courses, lessons,
+│       │                         # enrollments, quizzes, progress, admin,
+│       │                         # teacher, news, community, ai
 │       ├── models/               # SQLModel модели (таблицы БД)
-│       ├── schemas/              # Pydantic схемы запросов/ответов
+│       ├── schemas/              # Pydantic схемы запросов и ответов
 │       ├── core/                 # config, security, email, limiter, seed
 │       └── db/                   # engine, session
 └── frontend/
     ├── Dockerfile
     ├── nginx.conf
+    ├── vercel.json
     └── src/
-        ├── api/                  # API клиенты
-        ├── contexts/             # Auth, язык, тема
-        └── components/           # Страницы и UI компоненты
+        ├── api/                  # API-клиенты
+        ├── contexts/             # Контексты: Auth, язык, тема
+        └── components/           # Страницы и UI-компоненты
 ```
+
+---
+
+## База данных
+
+| Таблица | Описание |
+|---------|----------|
+| `users` | email, bcrypt-хэш пароля, роль, статус верификации, google_id, токены |
+| `courses` | название, описание, уровень, обложка, teacher_id |
+| `lessons` | title, content, video_url, subtitle_url, has_sign_language, duration_seconds, is_demo, порядок |
+| `enrollments` | student_id, course_id, прогресс (0–100%) |
+| `lesson_progress` | student_id, lesson_id, completed, watch_time_seconds |
+| `quizzes` | lesson_id (уникальный), passing_score |
+| `questions` | quiz_id, text_ru, text_kz, порядок |
+| `answers` | question_id, text_ru, text_kz, is_correct, порядок |
+| `quiz_attempts` | quiz_id, student_id, score (%), passed |
+| `news` | title/content на ru/kz, media, is_published, author_id |
+| `success_posts` | user_id, content, likes_count |
+| `success_post_likes` | post_id, user_id (уникальная пара — защита от дублей) |
+
+---
+
+## API Endpoints
+
+### Аутентификация (`/api/auth`)
+
+| Метод | Путь | Описание | Лимит |
+|-------|------|----------|-------|
+| POST | `/register` | Регистрация | 5/мин |
+| POST | `/login` | Вход, получение JWT | 10/мин |
+| GET | `/verify?token=` | Подтверждение email | — |
+| POST | `/resend-verification` | Повторная отправка письма | 3/мин |
+| POST | `/forgot-password` | Запрос сброса пароля | 3/мин |
+| POST | `/reset-password` | Установка нового пароля | 5/мин |
+| GET | `/google` | Инициализация Google OAuth | — |
+| GET | `/google/callback` | Callback Google OAuth | — |
+
+### Профиль (`/api`)
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | `/me` | Данные текущего пользователя |
+| PATCH | `/me` | Обновление имени / email |
+| POST | `/me/password` | Смена пароля |
+| GET | `/me/achievements` | Статистика достижений |
+| GET | `/me/study-friends` | Одногруппники по курсам |
+
+### Курсы (`/api`)
+
+| Метод | Путь | Описание | Роль |
+|-------|------|----------|------|
+| GET | `/courses` | Список курсов | auth |
+| GET | `/courses/{id}` | Детали курса | auth |
+| POST | `/courses` | Создать курс | teacher / admin |
+| PATCH | `/courses/{id}` | Обновить курс | владелец / admin |
+| DELETE | `/courses/{id}` | Удалить курс | владелец / admin |
+| POST | `/courses/{id}/enroll` | Записаться на курс | student |
+| GET | `/my-courses` | Мои записи | auth |
+
+### Уроки (`/api`)
+
+| Метод | Путь | Описание | Роль |
+|-------|------|----------|------|
+| GET | `/courses/{id}/lessons` | Уроки курса | auth |
+| GET | `/lessons/{id}` | Детали урока | auth |
+| POST | `/lessons` | Создать урок | teacher / admin |
+| PATCH | `/lessons/{id}` | Обновить урок | владелец / admin |
+| DELETE | `/lessons/{id}` | Удалить урок | владелец / admin |
+
+### Прогресс (`/api`)
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| POST | `/lessons/{id}/complete` | Отметить урок завершённым |
+| GET | `/lessons/{id}/progress` | Прогресс по уроку |
+| GET | `/courses/{id}/my-progress` | Прогресс по курсу |
+
+### Тесты (`/api`)
+
+| Метод | Путь | Описание | Роль |
+|-------|------|----------|------|
+| POST | `/lessons/{id}/quiz` | Создать тест | teacher / admin |
+| GET | `/lessons/{id}/quiz` | Получить тест | enrolled |
+| PATCH | `/quizzes/{id}` | Обновить тест | владелец / admin |
+| DELETE | `/quizzes/{id}` | Удалить тест | владелец / admin |
+| POST | `/quizzes/{id}/questions` | Добавить вопрос | teacher / admin |
+| PATCH | `/questions/{id}` | Обновить вопрос | владелец / admin |
+| DELETE | `/questions/{id}` | Удалить вопрос | владелец / admin |
+| POST | `/questions/{id}/answers` | Добавить вариант ответа | teacher / admin |
+| PATCH | `/answers/{id}` | Обновить ответ | владелец / admin |
+| DELETE | `/answers/{id}` | Удалить ответ | владелец / admin |
+| POST | `/questions/{id}/check` | Проверить одиночный ответ | enrolled |
+| POST | `/quizzes/{id}/submit` | Сдать тест | enrolled |
+| GET | `/quizzes/{id}/my-attempts` | Мои попытки | auth |
+
+### Прочее
+
+| Метод | Путь | Описание | Роль |
+|-------|------|----------|------|
+| GET/POST/PATCH/DELETE | `/news` | Новости | auth / admin |
+| GET/POST/DELETE | `/community/posts` | Лента успехов | auth |
+| POST | `/community/posts/{id}/like` | Лайк / снять лайк | auth |
+| POST | `/ai/chat` | AI-ассистент (Gemini) | auth |
+| GET/PATCH/DELETE | `/admin/users` | Управление пользователями | admin |
+| GET | `/admin/stats` | Статистика платформы | admin |
+| GET | `/teacher/stats` | Статистика преподавателя | teacher / admin |
+| GET | `/teacher/students` | Студенты преподавателя | teacher / admin |
+| GET | `/health` | Статус сервера | — |
+| GET | `/health/db` | Статус БД | — |
+
+---
 
 ## Запуск локально
 
-### Вариант 1 — Docker (рекомендуется)
+### Docker (рекомендуется)
 
 ```bash
 docker-compose up --build
@@ -54,17 +206,14 @@ docker-compose up --build
 - Бэкенд: http://localhost:8000
 - Swagger: http://localhost:8000/docs
 
-При изменении кода: `docker-compose up --build`
-Остановить: `docker-compose down`
-
-### Вариант 2 — Терминал
+### Вручную
 
 **Бэкенд:**
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\Activate.ps1      # Windows
-# source .venv/bin/activate     # macOS/Linux
+.venv\Scripts\Activate.ps1        # Windows
+# source .venv/bin/activate       # macOS / Linux
 pip install -r requirements.txt
 alembic upgrade head
 python -m uvicorn app.main:app --reload --port 8000
@@ -77,7 +226,9 @@ npm install
 npm run dev
 ```
 
-Фронтенд: http://localhost:5173 (Vite проксирует `/api` на бэкенд)
+Фронтенд: http://localhost:5173 — Vite проксирует `/api` на бэкенд.
+
+---
 
 ## Переменные окружения
 
@@ -85,160 +236,53 @@ npm run dev
 
 ```env
 # Обязательные
-SECRET_KEY=сгенерируй-через-secrets.token_urlsafe(32)
+SECRET_KEY=<сгенерировать: openssl rand -hex 32>
 DATABASE_URL=sqlite:///./qazedu.db
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 FRONTEND_URL=http://localhost:3000
 BACKEND_URL=http://localhost:8000
 
-# Админ (создаётся при старте если заданы)
+# Администратор (создаётся при старте)
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=Admin@1234
 ADMIN_FIRST_NAME=System
 ADMIN_LAST_NAME=Admin
 
-# AI (опционально)
-GEMINI_API_KEY=твой-ключ
-
-# Email (Gmail SMTP — App Password)
+# Email — локально (Gmail SMTP)
 SMTP_USERNAME=твой@gmail.com
-SMTP_PASSWORD=app-password-16-символов
+SMTP_PASSWORD=<16-значный App Password>
 SMTP_FROM_EMAIL=твой@gmail.com
+
+# Email — production (Resend API)
+RESEND_API_KEY=re_xxxxxx
 
 # Google OAuth (опционально)
 GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-xxx
+
+# AI (опционально)
+GEMINI_API_KEY=<ключ из Google AI Studio>
 ```
 
-## Аутентификация
+---
 
-### Регистрация
-1. Пользователь заполняет форму → `POST /api/auth/register`
-2. Создаётся аккаунт с `is_verified=False`
-3. На email отправляется письмо со ссылкой
-4. Пользователь нажимает ссылку → `GET /api/auth/verify?token=...`
-5. `is_verified=True`, можно войти
-
-### Логин
-- `POST /api/auth/login` → возвращает JWT токен (срок 7 дней)
-- Токен хранится в `localStorage`, отправляется в заголовке `Authorization: Bearer`
-
-### Сброс пароля
-1. `POST /api/auth/forgot-password` → письмо с ссылкой (TTL 1 час)
-2. `POST /api/auth/reset-password` → новый пароль
-
-### Google OAuth
-- `GET /api/auth/google` → редирект на Google
-- После авторизации: `GET /api/auth/google/callback` → JWT токен во фронт
-
-### Роли
-
-| Роль | Возможности |
-|------|-------------|
-| **student** | Курсы, уроки, квизы, прогресс, сообщество, AI‑чат |
-| **teacher** | Создание курсов/уроков/квизов, статистика студентов |
-| **admin** | Управление пользователями, курсами, новостями, статистика |
-
-## API Endpoints
-
-### Аутентификация
-
-| Метод | Путь | Описание | Лимит |
-|-------|------|----------|-------|
-| POST | `/api/auth/register` | Регистрация | 5/мин |
-| POST | `/api/auth/login` | Вход, получение JWT | 10/мин |
-| GET | `/api/auth/verify` | Подтверждение email | — |
-| POST | `/api/auth/resend-verification` | Повторная отправка письма | 3/мин |
-| POST | `/api/auth/forgot-password` | Запрос сброса пароля | 3/мин |
-| POST | `/api/auth/reset-password` | Установка нового пароля | 5/мин |
-| GET | `/api/auth/google` | Google OAuth редирект | — |
-| GET | `/api/auth/google/callback` | Google OAuth callback | — |
-
-### Профиль
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| GET | `/api/me` | Текущий пользователь |
-| PATCH | `/api/me` | Обновление профиля |
-| POST | `/api/me/password` | Смена пароля |
-| GET | `/api/me/achievements` | Статистика достижений |
-| GET | `/api/me/study-friends` | Учебные друзья |
-
-### Курсы
-
-| Метод | Путь | Описание | Роль |
-|-------|------|----------|------|
-| GET | `/api/courses` | Список курсов | auth |
-| GET | `/api/courses/{id}` | Детали курса | auth |
-| POST | `/api/courses` | Создать курс | teacher/admin |
-| PATCH | `/api/courses/{id}` | Обновить курс | owner/admin |
-| DELETE | `/api/courses/{id}` | Удалить курс | owner/admin |
-| POST | `/api/courses/{id}/enroll` | Записаться | student |
-| GET | `/api/my-courses` | Мои курсы | auth |
-
-### Уроки
-
-| Метод | Путь | Описание | Роль |
-|-------|------|----------|------|
-| GET | `/api/courses/{id}/lessons` | Уроки курса | auth |
-| GET | `/api/lessons/{id}` | Детали урока | auth |
-| POST | `/api/lessons` | Создать урок | teacher/admin |
-| PATCH | `/api/lessons/{id}` | Обновить урок | owner/admin |
-| DELETE | `/api/lessons/{id}` | Удалить урок | owner/admin |
-| POST | `/api/lessons/{id}/complete` | Отметить завершённым | auth |
-| GET | `/api/lessons/{id}/progress` | Прогресс по уроку | auth |
-| GET | `/api/courses/{id}/my-progress` | Прогресс по курсу | auth |
-
-### Квизы
-
-| Метод | Путь | Описание | Роль |
-|-------|------|----------|------|
-| POST | `/api/lessons/{id}/quiz` | Создать квиз | teacher/admin |
-| GET | `/api/lessons/{id}/quiz` | Получить квиз | enrolled |
-| PATCH | `/api/quizzes/{id}` | Обновить квиз | owner/admin |
-| DELETE | `/api/quizzes/{id}` | Удалить квиз | owner/admin |
-| POST | `/api/quizzes/{id}/questions` | Добавить вопрос | teacher/admin |
-| PATCH | `/api/questions/{id}` | Обновить вопрос | owner/admin |
-| DELETE | `/api/questions/{id}` | Удалить вопрос | owner/admin |
-| POST | `/api/questions/{id}/answers` | Добавить ответ | teacher/admin |
-| PATCH | `/api/answers/{id}` | Обновить ответ | owner/admin |
-| DELETE | `/api/answers/{id}` | Удалить ответ | owner/admin |
-| POST | `/api/quizzes/{id}/submit` | Сдать квиз | enrolled |
-| GET | `/api/quizzes/{id}/my-attempts` | Мои попытки | auth |
-
-### Прочее
-
-| Путь | Описание | Роль |
-|------|----------|------|
-| `/api/news` | Новости (CRUD) | auth / admin |
-| `/api/community/posts` | Стена успехов | auth |
-| `/api/ai/chat` | AI‑помощник | auth |
-| `/api/admin/*` | Управление платформой | admin |
-| `/api/teacher/*` | Статистика учителя | teacher/admin |
-| `/health` | Health check | — |
-| `/health/db` | DB connectivity | — |
-
-## База данных
-
-| Таблица | Описание |
-|---------|----------|
-| `users` | email, bcrypt хэш, роль, is_verified, google_id, токены сброса |
-| `courses` | Курсы с уровнем и обложкой |
-| `lessons` | Уроки с видео, субтитрами, жестовым языком |
-| `enrollments` | Записи студентов на курсы с прогрессом |
-| `lesson_progress` | Прогресс по каждому уроку |
-| `quizzes` | Квизы с проходным баллом |
-| `questions` | Вопросы (ru/kz) |
-| `answers` | Варианты ответов (ru/kz) |
-| `quiz_attempts` | Попытки прохождения квизов |
-| `news` | Новости (ru/kz, медиа) |
-| `success_posts` | Посты сообщества |
-| `success_post_likes` | Лайки постов |
-
-## Миграции
+## Миграции БД
 
 ```bash
-alembic upgrade head                              # Применить все
-alembic downgrade base                            # Откатить всё
-alembic revision --autogenerate -m "описание"    # Создать новую
+alembic upgrade head                           # Применить все миграции
+alembic downgrade base                         # Откатить всё
+alembic revision --autogenerate -m "описание"  # Создать новую миграцию
 ```
+
+---
+
+## Деплой (production)
+
+| Компонент | Сервис | URL |
+|-----------|--------|-----|
+| Frontend | Vercel | https://qazedu.vercel.app |
+| Backend | Render | https://qazedu.onrender.com |
+| База данных | Neon PostgreSQL | neon.tech |
+| Email | Resend API | resend.com |
+
+Push в ветку `main` автоматически запускает деплой на обоих сервисах.
