@@ -28,6 +28,8 @@ engine = create_engine(
     settings.database_url,
     echo=False,
     connect_args=_connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300,
 )
 
 

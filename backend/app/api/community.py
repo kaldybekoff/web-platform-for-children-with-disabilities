@@ -131,7 +131,6 @@ def delete_success_post(
     if post.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Can only delete your own posts")
     
-    session.exec(select(SuccessPostLike).where(SuccessPostLike.post_id == post_id))
     likes = session.exec(select(SuccessPostLike).where(SuccessPostLike.post_id == post_id)).all()
     for like in likes:
         session.delete(like)
