@@ -3,12 +3,11 @@ import * as authApi from '../api/auth';
 import * as meApi from '../api/me';
 import type { UserResponse, UserRole } from '../api/types';
 
-const TOKEN_KEY = 'token';
+const CSRF_KEY = 'csrf_token';
 const USER_KEY = 'user';
 
 interface AuthState {
   user: UserResponse | null;
-  token: string | null;
   loading: boolean;
 }
 
@@ -17,7 +16,7 @@ interface AuthContextValue extends AuthState {
   userRole: UserRole;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; password: string; name: string; role: UserRole }) => Promise<void>;
-  loginWithToken: (token: string) => void;
+  loginWithToken: (csrfToken: string) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -33,50 +32,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
   });
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
-  const [loading, setLoading] = useState(!!token);
+  const hasCsrf = !!localStorage.getItem(CSRF_KEY);
+  const [loading, setLoading] = useState(hasCsrf);
 
-  const persist = useCallback((newToken: string | null, newUser: UserResponse | null) => {
-    if (newToken) localStorage.setItem(TOKEN_KEY, newToken);
-    else localStorage.removeItem(TOKEN_KEY);
+  const persistUser = useCallback((newUser: UserResponse | null) => {
     if (newUser) localStorage.setItem(USER_KEY, JSON.stringify(newUser));
     else localStorage.removeItem(USER_KEY);
-    setToken(newToken);
     setUser(newUser);
   }, []);
 
+  const clearAuth = useCallback(() => {
+    localStorage.removeItem(CSRF_KEY);
+    localStorage.removeItem(USER_KEY);
+    setUser(null);
+  }, []);
+
   const refreshUser = useCallback(async () => {
-    if (!token) return;
     try {
       const u = await meApi.getMe();
-      setUser(u);
-      localStorage.setItem(USER_KEY, JSON.stringify(u));
+      persistUser(u);
     } catch {
-      persist(null, null);
+      clearAuth();
     }
-  }, [token, persist]);
+  }, [persistUser, clearAuth]);
 
   useEffect(() => {
-    if (!token) {
+    if (!hasCsrf) {
       setLoading(false);
       return;
     }
     meApi
       .getMe()
-      .then((u) => {
-        setUser(u);
-        localStorage.setItem(USER_KEY, JSON.stringify(u));
-      })
-      .catch(() => persist(null, null))
+      .then((u) => persistUser(u))
+      .catch(() => clearAuth())
       .finally(() => setLoading(false));
-  }, [token, persist]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await authApi.login({ email, password });
-      persist(res.access_token, res.user);
+      localStorage.setItem(CSRF_KEY, res.csrf_token);
+      persistUser(res.user);
     },
-    [persist]
+    [persistUser]
   );
 
   const register = useCallback(
@@ -91,23 +90,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         last_name,
         role: data.role,
       });
-      // Do NOT auto-login: user must verify email before accessing the platform.
     },
     []
   );
 
-  const loginWithToken = useCallback((token: string) => {
-    // Persist token without user; the useEffect will call /me and fill user data.
-    persist(token, null);
-  }, [persist]);
+  const loginWithToken = useCallback((csrfToken: string) => {
+    localStorage.setItem(CSRF_KEY, csrfToken);
+    // useEffect won't re-run; fetch user manually
+    meApi.getMe().then((u) => persistUser(u)).catch(() => clearAuth());
+  }, [persistUser, clearAuth]);
 
-  const logout = useCallback(() => {
-    persist(null, null);
-  }, [persist]);
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+    } finally {
+      clearAuth();
+    }
+  }, [clearAuth]);
 
   const value: AuthContextValue = {
     user,
-    token,
     loading,
     isAuthenticated: !!user,
     userRole: user?.role ?? 'student',

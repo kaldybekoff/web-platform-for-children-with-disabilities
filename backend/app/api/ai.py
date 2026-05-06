@@ -1,10 +1,11 @@
 """AI Chat endpoint using Google Gemini API."""
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Request, status, Depends
 from pydantic import BaseModel
 
 from app.api.deps import CurrentUser
 from app.core.config import settings
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -32,7 +33,9 @@ QazEdu — это платформа дистанционного обучени
 
 
 @router.post("/chat", response_model=ChatResponse)
+@limiter.limit("10/minute")
 async def chat_with_ai(
+    request: Request,
     body: ChatRequest,
     current_user: CurrentUser,
 ):

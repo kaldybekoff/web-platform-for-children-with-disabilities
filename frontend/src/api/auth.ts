@@ -1,16 +1,20 @@
 import { apiRequest } from './client';
-import type { TokenResponse, UserCreate, UserLogin } from './types';
+import type { LoginResponse, UserCreate, UserLogin } from './types';
 
 export interface RegisterResponse {
   message: string;
   email: string;
 }
 
-export async function login(body: UserLogin): Promise<TokenResponse> {
-  return apiRequest<TokenResponse>('/auth/login', {
+export async function login(body: UserLogin): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>('/auth/login', {
     method: 'POST',
     body: JSON.stringify(body),
   });
+}
+
+export async function logout(): Promise<void> {
+  await apiRequest<void>('/auth/logout', { method: 'POST' });
 }
 
 export async function register(body: UserCreate): Promise<RegisterResponse> {

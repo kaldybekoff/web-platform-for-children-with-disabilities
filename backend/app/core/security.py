@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime, timedelta
 
 import bcrypt
@@ -29,16 +30,23 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
         return False
 
 
-def create_access_token(subject: str) -> str:
+def create_access_token(subject: str) -> tuple[str, str]:
+    """Returns (jwt_token, csrf_token)."""
+    csrf = secrets.token_hex(32)
     expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
-    to_encode = {"sub": subject, "exp": expire}
-    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    to_encode = {"sub": subject, "exp": expire, "csrf": csrf}
+    token = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    return token, csrf
 
 
-def decode_access_token(token: str) -> str | None:
+def decode_access_token_full(token: str) -> tuple[str, str] | None:
+    """Returns (user_id, csrf_token) or None."""
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         sub = payload.get("sub")
-        return str(sub) if sub else None
+        csrf = payload.get("csrf", "")
+        if not sub:
+            return None
+        return str(sub), csrf
     except JWTError:
         return None

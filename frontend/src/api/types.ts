@@ -16,6 +16,11 @@ export interface TokenResponse {
   user: UserResponse;
 }
 
+export interface LoginResponse {
+  csrf_token: string;
+  user: UserResponse;
+}
+
 export interface UserCreate {
   email: string;
   password: string;

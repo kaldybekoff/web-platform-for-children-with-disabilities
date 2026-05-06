@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlmodel import Session, select
 
 from app.core.config import settings
@@ -14,10 +15,10 @@ from app.db.session import get_session
 from app.models.user import User
 from app.schemas.user import (
     ForgotPasswordRequest,
+    LoginResponse,
     RegisterResponse,
     ResendVerificationRequest,
     ResetPasswordRequest,
-    TokenResponse,
     UserCreate,
     UserLogin,
 )
@@ -27,6 +28,19 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 _VERIFY_TTL_HOURS = 24
 _RESET_TTL_HOURS = 1
+_COOKIE_MAX_AGE = 60 * 60 * 24 * 7  # 7 days
+
+
+def _set_auth_cookie(response, token: str) -> None:
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=_COOKIE_MAX_AGE,
+        path="/",
+    )
 
 # --- Google OAuth client (lazy-initialized only when credentials are set) ---
 _oauth = OAuth()
@@ -110,13 +124,13 @@ async def register(
     )
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login")
 @limiter.limit("10/minute")
 async def login(
     request: Request,
     body: UserLogin,
     session: Session = Depends(get_session),
-) -> TokenResponse:
+):
     user = session.exec(select(User).where(User.email == body.email)).first()
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -128,8 +142,19 @@ async def login(
             detail="Email not verified. Please check your inbox and click the verification link.",
         )
 
-    token = create_access_token(str(user.id))
-    return TokenResponse(access_token=token, user=user_to_response(user))
+    access_token, csrf_token = create_access_token(str(user.id))
+    resp = JSONResponse(content=jsonable_encoder(
+        LoginResponse(csrf_token=csrf_token, user=user_to_response(user))
+    ))
+    _set_auth_cookie(resp, access_token)
+    return resp
+
+
+@router.post("/logout")
+async def logout():
+    resp = JSONResponse(content={"message": "Logged out"})
+    resp.delete_cookie(key="access_token", httponly=True, secure=True, samesite="none", path="/")
+    return resp
 
 
 # ---------------------------------------------------------------------------
@@ -283,5 +308,7 @@ async def google_callback(
         session.add(user)
         session.commit()
 
-    jwt = create_access_token(str(user.id))
-    return RedirectResponse(url=f"{frontend}?auth_token={jwt}", status_code=302)
+    access_token, csrf_token = create_access_token(str(user.id))
+    resp = RedirectResponse(url=f"{frontend}?csrf_token={csrf_token}", status_code=302)
+    _set_auth_cookie(resp, access_token)
+    return resp

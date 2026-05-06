@@ -20,8 +20,8 @@ def validate_password_strength(password: str) -> str:
     """
     errors = []
     
-    if len(password) < 6:
-        errors.append("at least 6 characters")
+    if len(password) < 8:
+        errors.append("at least 8 characters")
     
     if not re.search(r'[A-Z]', password):
         errors.append("at least 1 uppercase letter")
@@ -103,6 +103,13 @@ class TokenResponse(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
+    user: UserResponse
+
+
+class LoginResponse(BaseModel):
+    """Response for login with HTTP-only cookie auth."""
+
+    csrf_token: str
     user: UserResponse
 
 

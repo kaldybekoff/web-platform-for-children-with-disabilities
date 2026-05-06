@@ -1,3 +1,5 @@
+const CSRF_KEY = 'csrf_token';
+
 const getBaseUrl = () => {
   const url = import.meta.env.VITE_API_URL;
   if (url) return url.replace(/\/$/, '');
@@ -10,10 +12,10 @@ export function getApiUrl(path: string): string {
   return `${base}/api${p}`;
 }
 
-export function getAuthHeader(): Record<string, string> {
-  const token = localStorage.getItem('token');
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+function getCsrfHeader(): Record<string, string> {
+  const csrf = localStorage.getItem(CSRF_KEY);
+  if (!csrf) return {};
+  return { 'X-CSRF-Token': csrf };
 }
 
 export async function apiRequest<T>(
@@ -28,10 +30,10 @@ export async function apiRequest<T>(
   }
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...getAuthHeader(),
+    ...getCsrfHeader(),
     ...(init.headers || {}),
   };
-  const res = await fetch(url, { ...init, headers });
+  const res = await fetch(url, { ...init, headers, credentials: 'include' });
   if (res.status === 204) return undefined as T;
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {

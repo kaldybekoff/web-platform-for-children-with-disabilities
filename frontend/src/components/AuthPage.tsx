@@ -75,8 +75,10 @@ export function AuthPage() {
     else if (v === 'expired') setBanner('verified-expired');
     else if (v === 'error') setBanner('verified-error');
 
+    const csrfToken = params.get('csrf_token');
     const authToken = params.get('auth_token');
-    if (authToken) loginWithToken(authToken);
+    if (csrfToken) loginWithToken(csrfToken);
+    else if (authToken) loginWithToken(authToken);
 
     const rt = params.get('reset_token');
     if (rt) { setResetToken(rt); setCurrentView('new-password'); }
@@ -84,7 +86,7 @@ export function AuthPage() {
     const ae = params.get('auth_error');
     if (ae) setBanner('google-error');
 
-    if (v || authToken || rt || ae) window.history.replaceState({}, '', window.location.pathname);
+    if (v || csrfToken || authToken || rt || ae) window.history.replaceState({}, '', window.location.pathname);
   }, [loginWithToken]);
 
   const handleInputChange = (field: string, value: string) => {

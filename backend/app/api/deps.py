@@ -1,38 +1,48 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Depends, HTTPException, Request, status
 from sqlmodel import Session, select
 
-from app.core.security import decode_access_token
+from app.core.security import decode_access_token_full
 from app.db.session import get_session
 from app.models.user import User
 
-security = HTTPBearer(auto_error=False)
+_COOKIE_NAME = "access_token"
+_CSRF_HEADER = "X-CSRF-Token"
+_SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
 
 def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
+    request: Request,
     session: Annotated[Session, Depends(get_session)],
 ) -> User:
-    if not credentials:
+    token = request.cookies.get(_COOKIE_NAME)
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
         )
-    token = credentials.credentials
-    user_id_str = decode_access_token(token)
-    if not user_id_str:
+    result = decode_access_token_full(token)
+    if not result:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
         )
+    user_id_str, csrf_in_token = result
+
+    if request.method not in _SAFE_METHODS:
+        csrf_header = request.headers.get(_CSRF_HEADER, "")
+        if not csrf_header or csrf_header != csrf_in_token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="CSRF token invalid",
+            )
+
     try:
         user_id = int(user_id_str)
     except ValueError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
