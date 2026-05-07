@@ -26,7 +26,7 @@ interface PasswordValidation {
 }
 
 function validatePassword(password: string): PasswordValidation {
-  const hasMinLength = password.length >= 6;
+  const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
@@ -101,8 +101,8 @@ export function AuthPage() {
     if (currentView === 'register') {
       if (!passwordValidation.isValid) {
         setError(t(
-          'Пароль должен содержать минимум 6 символов, заглавную и строчную букву, цифру и спецсимвол',
-          'Құпия сөз кемінде 6 таңба, бас және кіші әріп, сан және арнайы таңба болуы керек'
+          'Пароль должен содержать минимум 8 символов, заглавную и строчную букву, цифру и спецсимвол',
+          'Құпия сөз кемінде 8 таңба, бас және кіші әріп, сан және арнайы таңба болуы керек'
         ));
         return;
       }
@@ -136,8 +136,8 @@ export function AuthPage() {
     if (currentView === 'new-password') {
       if (!newPasswordValidation.isValid) {
         setError(t(
-          'Пароль должен содержать минимум 6 символов, заглавную и строчную букву, цифру и спецсимвол',
-          'Құпия сөз кемінде 6 таңба, бас және кіші әріп, сан және арнайы таңба болуы керек'
+          'Пароль должен содержать минимум 8 символов, заглавную и строчную букву, цифру и спецсимвол',
+          'Құпия сөз кемінде 8 таңба, бас және кіші әріп, сан және арнайы таңба болуы керек'
         ));
         return;
       }
@@ -420,7 +420,7 @@ export function AuthPage() {
                       <div className="grid grid-cols-1 gap-1 text-xs">
                         <div className={`flex items-center gap-1.5 ${passwordValidation.hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
                           {passwordValidation.hasMinLength ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-                          {t('Минимум 6 символов', 'Кемінде 6 таңба')}
+                          {t('Минимум 8 символов', 'Кемінде 8 таңба')}
                         </div>
                         <div className={`flex items-center gap-1.5 ${passwordValidation.hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
                           {passwordValidation.hasUppercase ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}

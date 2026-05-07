@@ -22,7 +22,7 @@ interface PasswordValidation {
 }
 
 function validatePassword(password: string): PasswordValidation {
-  const hasMinLength = password.length >= 6;
+  const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /\d/.test(password);
@@ -207,8 +207,8 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
     if (!currentPassword || !newPassword) return;
     if (!passwordValidation.isValid) {
       setError(t(
-        'Пароль должен содержать минимум 6 символов, заглавную и строчную букву, цифру и спецсимвол',
-        'Құпия сөз кемінде 6 таңба, бас және кіші әріп, сан және арнайы таңба болуы керек'
+        'Пароль должен содержать минимум 8 символов, заглавную и строчную букву, цифру и спецсимвол',
+        'Құпия сөз кемінде 8 таңба, бас және кіші әріп, сан және арнайы таңба болуы керек'
       ));
       return;
     }
@@ -393,7 +393,7 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
                       <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-1 text-xs">
                         <div className={`flex items-center gap-1 ${passwordValidation.hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
                           {passwordValidation.hasMinLength ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
-                          {t('Мин. 6 символов', 'Кем. 6 таңба')}
+                          {t('Мин. 8 символов', 'Кем. 8 таңба')}
                         </div>
                         <div className={`flex items-center gap-1 ${passwordValidation.hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>
                           {passwordValidation.hasUppercase ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}

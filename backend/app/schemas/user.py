@@ -10,7 +10,7 @@ Role = Literal["student", "teacher", "admin"]
 def validate_password_strength(password: str) -> str:
     """
     Validate password strength with the following requirements:
-    - At least 6 characters
+    - At least 8 characters
     - At least 1 uppercase letter
     - At least 1 lowercase letter
     - At least 1 digit
@@ -46,14 +46,22 @@ class UserCreate(BaseModel):
 
     email: EmailStr
     password: str
-    first_name: str = ""
-    last_name: str = ""
+    first_name: str
+    last_name: str
     role: Role = "student"
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
         return validate_password_strength(v)
+
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("This field is required")
+        return v
 
 
 class UserLogin(BaseModel):
