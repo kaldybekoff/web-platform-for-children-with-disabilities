@@ -27,10 +27,12 @@
 - Просмотр прогресса и статистики квизов студентов
 
 ### Администратор
-- Управление пользователями: просмотр, смена роли, удаление
-- Управление всеми курсами платформы
-- Публикация новостей (двуязычно: русский / казахский)
+- Отдельная админ-панель (starlette-admin) на собственном сервисе/поддомене
+- Управление пользователями: создание (с паролем, аккаунт сразу верифицирован), смена роли, сброс пароля (генерация временного), удаление
+- Управление всеми курсами, уроками, тестами платформы
+- Новости (двуязычно, русский / казахский): создание, массовая публикация и снятие с публикации
 - Просмотр статистики платформы
+- Создание учётной записи с ролью `admin` через публичную регистрацию запрещено
 
 ### Пользовательский путь
 1. Регистрация → подтверждение email (ссылка, TTL 24 ч) → вход
@@ -47,11 +49,12 @@
 | Frontend | React 18.3.1, TypeScript, Vite 6.3.5, Radix UI, Tailwind CSS, shadcn/ui |
 | Backend | FastAPI 0.115.6, SQLModel 0.0.22, Alembic 1.14.0, Uvicorn 0.32.1 |
 | База данных | PostgreSQL (Neon) / SQLite (локально) |
-| Аутентификация | JWT HS256 (python-jose), bcrypt, Google OAuth2 (authlib) |
+| Аутентификация | JWT HS256 (python-jose) в HTTP-only cookie + CSRF-токен, bcrypt, Google OAuth2 (authlib) |
+| Админ-панель | starlette-admin (отдельный ASGI-сервис) |
 | Email | Resend API (production), SMTP Gmail (локально) |
 | AI | Google Gemini API (google-genai) |
-| Безопасность | slowapi (rate limiting), SecurityHeadersMiddleware, SessionMiddleware |
-| Контейнеризация | Docker, docker-compose |
+| Безопасность | slowapi (rate limiting), SecurityHeadersMiddleware (CSP и пр.), CSRF double-submit, SessionMiddleware |
+| Контейнеризация | Docker, docker-compose (3 сервиса: backend, admin, frontend) |
 
 ---
 
@@ -112,8 +115,9 @@ web-platform-for-children-with-disabilities/
 
 | Метод | Путь | Описание | Лимит |
 |-------|------|----------|-------|
-| POST | `/register` | Регистрация | 5/мин |
-| POST | `/login` | Вход, получение JWT | 10/мин |
+| POST | `/register` | Регистрация (роль `admin` запрещена) | 5/мин |
+| POST | `/login` | Вход — устанавливает HTTP-only cookie, возвращает CSRF-токен | 10/мин |
+| POST | `/logout` | Выход — удаляет cookie | — |
 | GET | `/verify?token=` | Подтверждение email | — |
 | POST | `/resend-verification` | Повторная отправка письма | 3/мин |
 | POST | `/forgot-password` | Запрос сброса пароля | 3/мин |
@@ -213,6 +217,10 @@ docker-compose up --build
 вынесено в отдельный сервис на [starlette-admin](https://github.com/jowilf/starlette-admin)
 — модуль `app.admin`, точка входа `app.admin_app:app`. Это отдельный процесс/контейнер,
 который переиспользует те же модели и БД, что и основной API.
+
+Кастомные действия: для пользователей — задание пароля при создании/редактировании
+и «Сбросить пароль» (генерация временного пароля); для новостей — массовая
+публикация и снятие с публикации. Хэши паролей и токены в админке скрыты.
 
 Запуск вручную:
 ```bash
