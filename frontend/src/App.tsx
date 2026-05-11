@@ -11,11 +11,7 @@ import { AuthPage } from './components/AuthPage';
 import { TeacherCourses } from './components/TeacherCourses';
 import { TeacherStudents } from './components/TeacherStudents';
 import { TeacherProfile } from './components/TeacherProfile';
-import { AdminDashboard } from './components/AdminDashboard';
-import { AdminUsers } from './components/AdminUsers';
-import { AdminCourses } from './components/AdminCourses';
-import { AdminStats } from './components/AdminStats';
-import { AdminNews } from './components/AdminNews';
+import { AdminNotice } from './components/AdminNotice';
 import { TeacherHome } from './components/TeacherHome';
 import { NewsBlock } from './components/NewsBlock';
 import { Footer } from './components/Footer';
@@ -27,7 +23,7 @@ import type { UserRole } from './api/types';
 const defaultSectionByRole: Record<UserRole, string> = {
   student: 'home',
   teacher: 'home',
-  admin: 'dashboard',
+  admin: 'home',
 };
 
 function AppContent() {
@@ -118,15 +114,7 @@ function AppContent() {
         </>
       )}
 
-      {userRole === 'admin' && (
-        <>
-          {activeSection === 'dashboard' && <AdminDashboard />}
-          {activeSection === 'users' && <AdminUsers />}
-          {activeSection === 'courses' && <AdminCourses />}
-          {activeSection === 'news' && <AdminNews />}
-          {activeSection === 'stats' && <AdminStats />}
-        </>
-      )}
+      {userRole === 'admin' && <AdminNotice />}
 
       <Footer />
     </div>

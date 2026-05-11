@@ -159,25 +159,6 @@ export interface LessonProgressResponse {
   watch_time_seconds: number;
 }
 
-// Admin types
-export interface AdminStats {
-  total_users: number;
-  total_students: number;
-  total_teachers: number;
-  total_admins: number;
-  total_courses: number;
-  total_lessons: number;
-  total_enrollments: number;
-  completed_lessons: number;
-}
-
-export interface UserListResponse {
-  users: UserResponse[];
-  total: number;
-  page: number;
-  per_page: number;
-}
-
 // Teacher types
 export interface TeacherStats {
   total_courses: number;
@@ -238,24 +219,6 @@ export interface NewsResponse {
   author_id: number;
   created_at: string;
   updated_at: string;
-}
-
-export interface NewsCreate {
-  title_ru: string;
-  title_kz?: string;
-  content_ru: string;
-  content_kz?: string;
-  media_url?: string | null;
-  is_published?: boolean;
-}
-
-export interface NewsUpdate {
-  title_ru?: string;
-  title_kz?: string;
-  content_ru?: string;
-  content_kz?: string;
-  media_url?: string | null;
-  is_published?: boolean;
 }
 
 export interface NewsListResponse {

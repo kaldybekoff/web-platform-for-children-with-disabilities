@@ -43,9 +43,6 @@ class Settings(BaseSettings):
     # Backend public URL (used as OAuth redirect_uri base)
     backend_url: str = "http://localhost:8000"
 
-    # Brevo (Sendinblue) — sends to anyone, free 300/day
-    brevo_api_key: str = ""
-
     # Resend (email API — fallback)
     resend_api_key: str = ""
 
@@ -55,7 +52,7 @@ class Settings(BaseSettings):
 
     @property
     def email_verification_enabled(self) -> bool:
-        return bool(self.brevo_api_key or self.resend_api_key or (self.smtp_username and self.smtp_password))
+        return bool(self.resend_api_key or (self.smtp_username and self.smtp_password))
 
     @property
     def google_oauth_enabled(self) -> bool:

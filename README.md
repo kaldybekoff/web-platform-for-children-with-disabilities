@@ -65,10 +65,12 @@ web-platform-for-children-with-disabilities/
 │   ├── requirements.txt
 │   ├── alembic/                  # Миграции БД
 │   └── app/
-│       ├── main.py               # FastAPI приложение, middleware
+│       ├── main.py               # FastAPI приложение (публичное API), middleware
+│       ├── admin_app.py          # ASGI-вход отдельного сервиса админки
 │       ├── api/                  # Роутеры: auth, users, courses, lessons,
-│       │                         # enrollments, quizzes, progress, admin,
+│       │                         # enrollments, quizzes, progress,
 │       │                         # teacher, news, community, ai
+│       ├── admin/                # starlette-admin: views, auth provider
 │       ├── models/               # SQLModel модели (таблицы БД)
 │       ├── schemas/              # Pydantic схемы запросов и ответов
 │       ├── core/                 # config, security, email, limiter, seed
@@ -181,12 +183,10 @@ web-platform-for-children-with-disabilities/
 
 | Метод | Путь | Описание | Роль |
 |-------|------|----------|------|
-| GET/POST/PATCH/DELETE | `/news` | Новости | auth / admin |
+| GET | `/news` | Опубликованные новости | auth |
 | GET/POST/DELETE | `/community/posts` | Лента успехов | auth |
 | POST | `/community/posts/{id}/like` | Лайк / снять лайк | auth |
 | POST | `/ai/chat` | AI-ассистент (Gemini) | auth |
-| GET/PATCH/DELETE | `/admin/users` | Управление пользователями | admin |
-| GET | `/admin/stats` | Статистика платформы | admin |
 | GET | `/teacher/stats` | Статистика преподавателя | teacher / admin |
 | GET | `/teacher/students` | Студенты преподавателя | teacher / admin |
 | GET | `/health` | Статус сервера | — |
@@ -205,6 +205,25 @@ docker-compose up --build
 - Фронтенд: http://localhost:3000
 - Бэкенд: http://localhost:8000
 - Swagger: http://localhost:8000/docs
+- Админ-панель: http://localhost:8001/admin
+
+### Админ-панель
+
+Управление данными (пользователи, курсы, уроки, тесты, новости, сообщество)
+вынесено в отдельный сервис на [starlette-admin](https://github.com/jowilf/starlette-admin)
+— модуль `app.admin`, точка входа `app.admin_app:app`. Это отдельный процесс/контейнер,
+который переиспользует те же модели и БД, что и основной API.
+
+Запуск вручную:
+```bash
+cd backend
+python -m uvicorn app.admin_app:app --reload --port 8001
+```
+
+Вход — по учётным данным пользователя с ролью `admin` (тот же логин/пароль, что
+заданы через `ADMIN_EMAIL` / `ADMIN_PASSWORD`). В продакшене сервис разворачивается
+на отдельном поддомене (например `admin.example.com`) через reverse-proxy на порт 8001;
+во фронтенде ссылка на него задаётся переменной сборки `VITE_ADMIN_URL`.
 
 ### Вручную
 

@@ -8,6 +8,16 @@ services:
     environment:
       PORT: 8000
 
+  admin:
+    build: ./backend
+    command: uvicorn app.admin_app:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - backend
+
   frontend:
     build: ./frontend
     ports:

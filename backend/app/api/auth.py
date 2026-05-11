@@ -1,8 +1,9 @@
+import logging
 import secrets
 from datetime import datetime, timedelta
 
 from authlib.integrations.starlette_client import OAuth
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlmodel import Session, select
@@ -13,6 +14,8 @@ from app.core.limiter import limiter
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.session import get_session
 from app.models.user import User
+
+logger = logging.getLogger(__name__)
 from app.schemas.user import (
     ForgotPasswordRequest,
     LoginResponse,
@@ -86,7 +89,6 @@ def _assign_reset_token(user: User) -> str:
 async def register(
     request: Request,
     body: UserCreate,
-    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ) -> RegisterResponse:
     if body.role == "admin":
@@ -116,7 +118,10 @@ async def register(
 
     if settings.email_verification_enabled:
         name = f"{body.first_name} {body.last_name}".strip() or body.email
-        background_tasks.add_task(send_verification_email, body.email, name, token)
+        try:
+            await send_verification_email(body.email, name, token)
+        except Exception as e:
+            logger.error("Failed to send verification email to %s: %s", body.email, e)
 
     return RegisterResponse(
         message="Registration successful. Please check your email to verify your account.",
@@ -186,7 +191,6 @@ async def verify_email(token: str, session: Session = Depends(get_session)) -> R
 async def resend_verification(
     request: Request,
     body: ResendVerificationRequest,
-    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ) -> dict:
     if not settings.email_verification_enabled:
@@ -201,7 +205,10 @@ async def resend_verification(
     session.commit()
 
     name = f"{user.first_name} {user.last_name}".strip() or user.email
-    background_tasks.add_task(send_verification_email, user.email, name, token)
+    try:
+        await send_verification_email(user.email, name, token)
+    except Exception as e:
+        logger.error("Failed to send verification email to %s: %s", user.email, e)
     return {"message": "If that email exists and is unverified, a new link has been sent."}
 
 
@@ -214,7 +221,6 @@ async def resend_verification(
 async def forgot_password(
     request: Request,
     body: ForgotPasswordRequest,
-    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ) -> dict:
     """Send a password-reset email. Always 200 to prevent email enumeration."""
@@ -225,7 +231,10 @@ async def forgot_password(
         session.commit()
         name = f"{user.first_name} {user.last_name}".strip() or user.email
         if settings.email_verification_enabled:
-            background_tasks.add_task(send_password_reset_email, user.email, name, token)
+            try:
+                await send_password_reset_email(user.email, name, token)
+            except Exception as e:
+                logger.error("Failed to send password reset email to %s: %s", user.email, e)
 
     return {"message": "If an account with that email exists, a reset link has been sent."}
 

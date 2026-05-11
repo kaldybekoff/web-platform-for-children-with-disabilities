@@ -1,4 +1,4 @@
-"""Email sending service — Resend API (primary) or SMTP fallback."""
+"""Email sending service — SMTP (primary) with Resend fallback."""
 import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -9,6 +9,7 @@ import httpx
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 _VERIFICATION_HTML = """\
 <!DOCTYPE html>
@@ -122,22 +123,6 @@ _RESET_HTML = """\
 """
 
 
-async def _send_via_brevo(to_email: str, subject: str, html: str) -> None:
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            "https://api.brevo.com/v3/smtp/email",
-            headers={"api-key": settings.brevo_api_key, "Content-Type": "application/json"},
-            json={
-                "sender": {"name": settings.smtp_from_name, "email": settings.smtp_from_email or settings.smtp_username},
-                "to": [{"email": to_email}],
-                "subject": subject,
-                "htmlContent": html,
-            },
-            timeout=15,
-        )
-        resp.raise_for_status()
-
-
 async def _send_via_resend(to_email: str, subject: str, html: str) -> None:
     from_addr = f"{settings.smtp_from_name} <onboarding@resend.dev>"
     async with httpx.AsyncClient() as client:
@@ -167,9 +152,7 @@ async def _send_via_smtp(to_email: str, subject: str, html: str) -> None:
 
 
 async def _send(to_email: str, subject: str, html: str) -> None:
-    if settings.brevo_api_key:
-        await _send_via_brevo(to_email, subject, html)
-    elif settings.resend_api_key:
+    if settings.resend_api_key:
         await _send_via_resend(to_email, subject, html)
     else:
         await _send_via_smtp(to_email, subject, html)
