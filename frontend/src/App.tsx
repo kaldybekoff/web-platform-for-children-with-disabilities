@@ -11,7 +11,6 @@ import { AuthPage } from './components/AuthPage';
 import { TeacherCourses } from './components/TeacherCourses';
 import { TeacherStudents } from './components/TeacherStudents';
 import { TeacherProfile } from './components/TeacherProfile';
-import { AdminNotice } from './components/AdminNotice';
 import { TeacherHome } from './components/TeacherHome';
 import { NewsBlock } from './components/NewsBlock';
 import { Footer } from './components/Footer';
@@ -113,8 +112,6 @@ function AppContent() {
           {activeSection === 'community' && <CommunityPage />}
         </>
       )}
-
-      {userRole === 'admin' && <AdminNotice />}
 
       <Footer />
     </div>

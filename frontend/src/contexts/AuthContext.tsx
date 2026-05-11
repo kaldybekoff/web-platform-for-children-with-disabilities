@@ -6,6 +6,10 @@ import type { UserResponse, UserRole } from '../api/types';
 const CSRF_KEY = 'csrf_token';
 const USER_KEY = 'user';
 
+// Thrown when an admin tries to sign in via the public site — the admin panel
+// is a separate service and admin accounts must not be used here.
+export const ADMIN_NOT_ALLOWED = 'ADMIN_NOT_ALLOWED';
+
 interface AuthState {
   user: UserResponse | null;
   loading: boolean;
@@ -47,14 +51,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  // Admin accounts belong to the separate admin service — never let them in here.
+  const rejectAdmin = useCallback(async (csrfToken?: string) => {
+    if (csrfToken) localStorage.setItem(CSRF_KEY, csrfToken);
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore — we clear local state regardless
+    }
+    clearAuth();
+  }, [clearAuth]);
+
   const refreshUser = useCallback(async () => {
     try {
       const u = await meApi.getMe();
+      if (u.role === 'admin') {
+        await rejectAdmin();
+        return;
+      }
       persistUser(u);
     } catch {
       clearAuth();
     }
-  }, [persistUser, clearAuth]);
+  }, [persistUser, clearAuth, rejectAdmin]);
 
   useEffect(() => {
     if (!hasCsrf) {
@@ -63,7 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     meApi
       .getMe()
-      .then((u) => persistUser(u))
+      .then((u) => {
+        if (u.role === 'admin') return rejectAdmin();
+        persistUser(u);
+      })
       .catch(() => clearAuth())
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,10 +94,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await authApi.login({ email, password });
+      if (res.user.role === 'admin') {
+        await rejectAdmin(res.csrf_token);
+        throw new Error(ADMIN_NOT_ALLOWED);
+      }
       localStorage.setItem(CSRF_KEY, res.csrf_token);
       persistUser(res.user);
     },
-    [persistUser]
+    [persistUser, rejectAdmin]
   );
 
   const register = useCallback(
@@ -97,8 +123,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithToken = useCallback((csrfToken: string) => {
     localStorage.setItem(CSRF_KEY, csrfToken);
     // useEffect won't re-run; fetch user manually
-    meApi.getMe().then((u) => persistUser(u)).catch(() => clearAuth());
-  }, [persistUser, clearAuth]);
+    meApi
+      .getMe()
+      .then((u) => {
+        if (u.role === 'admin') return rejectAdmin();
+        persistUser(u);
+      })
+      .catch(() => clearAuth());
+  }, [persistUser, clearAuth, rejectAdmin]);
 
   const logout = useCallback(async () => {
     try {

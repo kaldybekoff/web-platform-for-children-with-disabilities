@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Card } from './ui/card';
 import { Label } from './ui/label';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, ADMIN_NOT_ALLOWED } from '../contexts/AuthContext';
 import { resendVerification, forgotPassword, resetPassword } from '../api/auth';
 import { getApiUrl } from '../api/client';
 import type { UserRole } from '../api/types';
@@ -160,7 +160,14 @@ export function AuthPage() {
     try {
       await login(formData.email, formData.password);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('Неверный email или пароль', 'Email немесе құпия сөз қате'));
+      if (err instanceof Error && err.message === ADMIN_NOT_ALLOWED) {
+        setError(t(
+          'Административные учётные записи недоступны на этом сайте — используйте админ-панель.',
+          'Әкімшілік тіркелгілер бұл сайтта қолжетімсіз — әкімші панелін пайдаланыңыз.',
+        ));
+      } else {
+        setError(err instanceof Error ? err.message : t('Неверный email или пароль', 'Email немесе құпия сөз қате'));
+      }
     } finally { setSubmitting(false); }
   };
 
