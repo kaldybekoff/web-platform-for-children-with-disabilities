@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, GraduationCap, School, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -14,7 +14,6 @@ export type { UserRole };
 
 type AuthView = 'login' | 'register' | 'check-email' | 'reset' | 'new-password';
 type Banner = 'verified' | 'verified-expired' | 'verified-error' | 'reset-success' | 'google-error' | null;
-type RegisterRole = 'student' | 'teacher';
 
 interface PasswordValidation {
   isValid: boolean;
@@ -48,7 +47,6 @@ export function AuthPage() {
   const [currentView, setCurrentView] = useState<AuthView>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [registerRole, setRegisterRole] = useState<RegisterRole>('student');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
@@ -122,7 +120,7 @@ export function AuthPage() {
       }
       setSubmitting(true);
       try {
-        await register({ email: formData.email, password: formData.password, name: formData.name, role: registerRole });
+        await register({ email: formData.email, password: formData.password, name: formData.name, role: 'student' });
         setPendingEmail(formData.email);
         setCurrentView('check-email');
       } catch (err: unknown) {
@@ -488,37 +486,6 @@ export function AuthPage() {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-gray-700 dark:text-gray-300">
-                    {t('Я регистрируюсь как', 'Мен тіркелемін')}
-                  </Label>
-                  <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setRegisterRole('student')}
-                      className={`flex items-center justify-center gap-2 py-3 px-3 sm:px-4 rounded-xl border-2 transition-all ${
-                        registerRole === 'student'
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                          : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <GraduationCap className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium text-sm sm:text-base">{t('Ученик', 'Оқушы')}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRegisterRole('teacher')}
-                      className={`flex items-center justify-center gap-2 py-3 px-3 sm:px-4 rounded-xl border-2 transition-all ${
-                        registerRole === 'teacher'
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                          : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <School className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium text-sm sm:text-base">{t('Учитель', 'Мұғалім')}</span>
-                    </button>
-                  </div>
-                </div>
 
                 {error && (
                   <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
