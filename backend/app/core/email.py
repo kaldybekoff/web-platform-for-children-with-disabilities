@@ -124,7 +124,7 @@ _RESET_HTML = """\
 
 
 async def _send_via_resend(to_email: str, subject: str, html: str) -> None:
-    from_addr = f"{settings.smtp_from_name} <onboarding@resend.dev>"
+    from_addr = f"{settings.smtp_from_name} <{settings.resend_from_email}>"
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             "https://api.resend.com/emails",
@@ -148,6 +148,7 @@ async def _send_via_smtp(to_email: str, subject: str, html: str) -> None:
         start_tls=True,
         username=settings.smtp_username,
         password=settings.smtp_password,
+        timeout=10,
     )
 
 

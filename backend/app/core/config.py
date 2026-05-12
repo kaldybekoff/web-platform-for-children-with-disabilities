@@ -45,6 +45,9 @@ class Settings(BaseSettings):
 
     # Resend (email API — fallback)
     resend_api_key: str = ""
+    # Sender address for Resend. Must be on a domain verified in Resend.
+    # Falls back to Resend's test sender (delivers only to the account owner).
+    resend_from_email: str = "onboarding@resend.dev"
 
     # Google OAuth2
     google_client_id: str = ""
