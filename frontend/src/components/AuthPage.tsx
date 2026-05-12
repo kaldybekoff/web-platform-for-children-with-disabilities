@@ -14,6 +14,7 @@ export type { UserRole };
 
 type AuthView = 'login' | 'register' | 'check-email' | 'reset' | 'new-password';
 type Banner = 'verified' | 'verified-expired' | 'verified-error' | 'reset-success' | 'google-error' | null;
+type PendingEmailPurpose = 'verify' | 'reset';
 
 interface PasswordValidation {
   isValid: boolean;
@@ -50,6 +51,7 @@ export function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingEmailPurpose, setPendingEmailPurpose] = useState<PendingEmailPurpose>('verify');
   const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [resetToken, setResetToken] = useState('');
   const [banner, setBanner] = useState<Banner>(null);
@@ -122,6 +124,7 @@ export function AuthPage() {
       try {
         await register({ email: formData.email, password: formData.password, name: formData.name, role: 'student' });
         setPendingEmail(formData.email);
+        setPendingEmailPurpose('verify');
         setCurrentView('check-email');
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : t('Ошибка регистрации', 'Тіркелу қатесі'));
@@ -134,6 +137,7 @@ export function AuthPage() {
       try {
         await forgotPassword(formData.email);
         setPendingEmail(formData.email);
+        setPendingEmailPurpose('reset');
         setCurrentView('check-email');
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : t('Ошибка', 'Қате'));
@@ -183,7 +187,11 @@ export function AuthPage() {
     if (resendStatus !== 'idle') return;
     setResendStatus('sending');
     try {
-      await resendVerification(pendingEmail);
+      if (pendingEmailPurpose === 'reset') {
+        await forgotPassword(pendingEmail);
+      } else {
+        await resendVerification(pendingEmail);
+      }
       setResendStatus('sent');
     } catch {
       setResendStatus('idle');
@@ -616,10 +624,15 @@ export function AuthPage() {
                   {t('Проверьте почту', 'Поштаңызды тексеріңіз')}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                  {t(
-                    `Мы отправили письмо на ${pendingEmail}. Нажмите на ссылку в письме, чтобы активировать аккаунт.`,
-                    `${pendingEmail} адресіне хат жібердік. Аккаунтты белсендіру үшін хаттағы сілтемені басыңыз.`,
-                  )}
+                  {pendingEmailPurpose === 'reset'
+                    ? t(
+                      `Мы отправили письмо на ${pendingEmail}. Нажмите на ссылку в письме, чтобы задать новый пароль.`,
+                      `${pendingEmail} адресіне хат жібердік. Жаңа құпия сөз орнату үшін хаттағы сілтемені басыңыз.`,
+                    )
+                    : t(
+                      `Мы отправили письмо на ${pendingEmail}. Нажмите на ссылку в письме, чтобы активировать аккаунт.`,
+                      `${pendingEmail} адресіне хат жібердік. Аккаунтты белсендіру үшін хаттағы сілтемені басыңыз.`,
+                    )}
                 </p>
               </div>
               <div className="space-y-3">

@@ -132,6 +132,12 @@ async def _send_via_resend(to_email: str, subject: str, html: str) -> None:
             json={"from": from_addr, "to": [to_email], "subject": subject, "html": html},
             timeout=15,
         )
+        if resp.is_error:
+            logger.error(
+                "Resend email failed: status=%s body=%s",
+                resp.status_code,
+                resp.text[:1000],
+            )
         resp.raise_for_status()
 
 
@@ -154,9 +160,19 @@ async def _send_via_smtp(to_email: str, subject: str, html: str) -> None:
 
 async def _send(to_email: str, subject: str, html: str) -> None:
     if settings.resend_api_key:
-        await _send_via_resend(to_email, subject, html)
-    else:
+        try:
+            await _send_via_resend(to_email, subject, html)
+            return
+        except Exception:
+            if not (settings.smtp_username and settings.smtp_password):
+                raise
+            logger.exception("Resend failed; falling back to SMTP")
+
+    if settings.smtp_username and settings.smtp_password:
         await _send_via_smtp(to_email, subject, html)
+        return
+
+    raise RuntimeError("Email provider is not configured")
 
 
 async def send_verification_email(to_email: str, name: str, token: str) -> None:
