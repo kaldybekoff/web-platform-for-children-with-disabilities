@@ -56,7 +56,10 @@
 - Реализован через `authlib` + `SessionMiddleware` (itsdangerous)
 - Серверный обмен кодами — токены не передаются через браузер
 - Google OAuth пользователи получают `is_verified=True` автоматически
-- Redirect URI верифицируется на стороне Google
+- Redirect URI формируется как `{BACKEND_URL}/api/auth/google/callback` и должен быть
+  заранее зарегистрирован в Google Cloud Console (иначе `redirect_uri_mismatch`);
+  в продакшене — `https://api.qazedu.uk/api/auth/google/callback`
+- Client ID / Client Secret хранятся только в переменных окружения
 
 ---
 
@@ -135,7 +138,7 @@ font-src 'self' data: https://cdn.jsdelivr.net;
 
 - `allow_origins` — из переменной `CORS_ORIGINS` (`.env`)
 - По умолчанию: `http://localhost:5173`, `http://localhost:3000`
-- Production: `https://qazedu.vercel.app`
+- Production: `https://qazedu.uk`, `https://www.qazedu.uk`, `https://admin.qazedu.uk`
 - `allow_credentials=True`, методы и заголовки без ограничений
 
 ---
@@ -157,10 +160,13 @@ font-src 'self' data: https://cdn.jsdelivr.net;
 
 **Файл:** `backend/app/core/email.py`
 
-Приоритет отправки: **Brevo API → Resend API → SMTP**.
+Приоритет отправки: **Resend API → SMTP** (если задан `RESEND_API_KEY` — используется Resend, иначе SMTP).
 
-- **Production (Render):** Resend API — исходящий SMTP заблокирован на бесплатном тарифе Render
-- **Локально:** Gmail SMTP с App Password
+- **Production (Render):** Resend API по HTTPS — исходящий SMTP (порт 587) заблокирован на Render
+- Отправитель Resend задаётся `RESEND_FROM_EMAIL` (по умолчанию тестовый `onboarding@resend.dev`,
+  который доставляет только владельцу аккаунта Resend); в продакшене — `noreply@qazedu.uk`,
+  домен `qazedu.uk` верифицирован в Resend (DKIM / SPF / DMARC)
+- **SMTP-fallback** (`aiosmtplib`, STARTTLS, `timeout=10`) — годится только локально
 - Если ни один провайдер не настроен — email-верификация отключена, `is_verified=True` при регистрации
 - Ошибки отправки логируются, но не блокируют завершение запроса
 

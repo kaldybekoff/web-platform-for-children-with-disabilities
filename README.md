@@ -1,8 +1,9 @@
 # QazEdu Special
 
-**Веб-сайт:** https://qazedu.vercel.app  
-**API:** https://qazedu.onrender.com  
-**Документация API (Swagger):** https://qazedu.onrender.com/docs
+**Веб-сайт:** https://qazedu.uk  
+**API:** https://api.qazedu.uk  
+**Документация API (Swagger):** https://api.qazedu.uk/docs  
+**Админ-панель:** https://admin.qazedu.uk
 
 Инклюзивная образовательная платформа для глухих и слабослышащих детей. Платформа обеспечивает доступ к видеоурокам с субтитрами и поддержкой жестового языка, позволяет отслеживать прогресс обучения и взаимодействовать с AI-ассистентом.
 
@@ -51,7 +52,7 @@
 | База данных | PostgreSQL (Neon) / SQLite (локально) |
 | Аутентификация | JWT HS256 (python-jose) в HTTP-only cookie + CSRF-токен, bcrypt, Google OAuth2 (authlib) |
 | Админ-панель | starlette-admin (отдельный ASGI-сервис) |
-| Email | Resend API (production), SMTP Gmail (локально) |
+| Email | Resend API (HTTP); SMTP — резервный путь в коде |
 | AI | Google Gemini API (google-genai) |
 | Безопасность | slowapi (rate limiting), SecurityHeadersMiddleware (CSP и пр.), CSRF double-submit, SessionMiddleware |
 | Контейнеризация | Docker, docker-compose (3 сервиса: backend, admin, frontend) |
@@ -229,9 +230,9 @@ python -m uvicorn app.admin_app:app --reload --port 8001
 ```
 
 Вход — по учётным данным пользователя с ролью `admin` (тот же логин/пароль, что
-заданы через `ADMIN_EMAIL` / `ADMIN_PASSWORD`). В продакшене сервис разворачивается
-на отдельном поддомене (например `admin.example.com`) через reverse-proxy на порт 8001;
-во фронтенде ссылка на него задаётся переменной сборки `VITE_ADMIN_URL`.
+заданы через `ADMIN_EMAIL` / `ADMIN_PASSWORD`). В продакшене это отдельный Render-сервис
+(`qazedu-admin`), доступный на поддомене https://admin.qazedu.uk; ему нужны только
+`DATABASE_URL` и `SECRET_KEY` — он работает напрямую с БД, а не через API.
 
 ### Вручную
 
@@ -275,15 +276,18 @@ ADMIN_PASSWORD=Admin@1234
 ADMIN_FIRST_NAME=System
 ADMIN_LAST_NAME=Admin
 
-# Email — локально (Gmail SMTP)
-SMTP_USERNAME=твой@gmail.com
-SMTP_PASSWORD=<16-значный App Password>
-SMTP_FROM_EMAIL=твой@gmail.com
-
-# Email — production (Resend API)
+# Email — Resend API (если не задан, email-верификация отключается)
 RESEND_API_KEY=re_xxxxxx
+RESEND_FROM_EMAIL=noreply@твой-домен        # адрес на домене, верифицированном в Resend
+# (необязательно) резервный SMTP — Render блокирует исходящий 587, годится только локально
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USERNAME=твой@gmail.com
+# SMTP_PASSWORD=<16-значный App Password>
+# SMTP_FROM_EMAIL=твой@gmail.com
 
-# Google OAuth (опционально)
+# Google OAuth (опционально). Redirect URI в Google Cloud Console должен быть
+# ровно {BACKEND_URL}/api/auth/google/callback
 GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-xxx
 
@@ -307,9 +311,18 @@ alembic revision --autogenerate -m "описание"  # Создать нову
 
 | Компонент | Сервис | URL |
 |-----------|--------|-----|
-| Frontend | Vercel | https://qazedu.vercel.app |
-| Backend | Render | https://qazedu.onrender.com |
+| Frontend | Vercel (`qazedu`) | https://qazedu.uk |
+| Backend | Render (`qazedu`) | https://api.qazedu.uk |
+| Админ-панель | Render (`qazedu-admin`) | https://admin.qazedu.uk |
 | База данных | Neon PostgreSQL | neon.tech |
 | Email | Resend API | resend.com |
+| DNS / домен | Cloudflare Registrar | qazedu.uk |
 
-Push в ветку `main` автоматически запускает деплой на обоих сервисах.
+Домен `qazedu.uk` зарегистрирован в Cloudflare; поддомены `api` и `admin` указывают
+CNAME-записями на соответствующие Render-сервисы (Proxy: DNS only), корень и `www` —
+на Vercel. Push в ветку `main` автоматически запускает деплой всех сервисов.
+
+Переменные окружения в продакшене отличаются от локальных: `SECRET_KEY` — свой
+случайный; `BACKEND_URL=https://api.qazedu.uk`; `FRONTEND_URL=https://qazedu.uk`;
+`CORS_ORIGINS=https://qazedu.uk,https://www.qazedu.uk,https://admin.qazedu.uk`;
+на Vercel — `VITE_API_URL=https://api.qazedu.uk`.
