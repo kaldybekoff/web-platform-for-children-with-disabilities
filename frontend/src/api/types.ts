@@ -8,6 +8,10 @@ export interface UserResponse {
   role: UserRole;
   created_at: string;
   updated_at: string;
+  /** false for OAuth-only accounts that haven't set a password yet */
+  has_password: boolean;
+  /** true if a Google account is linked */
+  google_connected: boolean;
 }
 
 export interface TokenResponse {
@@ -41,7 +45,8 @@ export interface UserUpdate {
 }
 
 export interface PasswordChange {
-  current_password: string;
+  /** omit when the account has no password yet (OAuth-only) */
+  current_password?: string;
   new_password: string;
 }
 

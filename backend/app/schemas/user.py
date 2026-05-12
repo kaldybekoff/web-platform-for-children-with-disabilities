@@ -80,9 +80,14 @@ class UserUpdate(BaseModel):
 
 
 class PasswordChange(BaseModel):
-    """Request body for password change."""
+    """Request body for password change.
 
-    current_password: str
+    `current_password` is required for accounts that already have a password.
+    For OAuth-only accounts (signed up via Google, no password yet) it may be
+    omitted — this is the "set a password for the first time" case.
+    """
+
+    current_password: str | None = None
     new_password: str
 
     @field_validator("new_password")
@@ -101,6 +106,9 @@ class UserResponse(BaseModel):
     role: Role
     created_at: datetime
     updated_at: datetime
+    # auth methods available on this account (for the profile "security" section)
+    has_password: bool = True
+    google_connected: bool = False
 
     class Config:
         from_attributes = True

@@ -98,6 +98,10 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
 
   const displayName = userData ? [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.email : '';
 
+  // OAuth-only accounts have no password yet — show a "set password" flow instead of "change password"
+  const hasPassword = userData?.has_password ?? true;
+  const googleConnected = userData?.google_connected ?? false;
+
   const passwordValidation = useMemo(() => validatePassword(newPassword), [newPassword]);
 
   const stats = achievementStats || {
@@ -204,7 +208,7 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
   };
 
   const handleSavePassword = async () => {
-    if (!currentPassword || !newPassword) return;
+    if (!newPassword || (hasPassword && !currentPassword)) return;
     if (!passwordValidation.isValid) {
       setError(t(
         'Пароль должен содержать минимум 8 символов, заглавную и строчную букву, цифру и спецсимвол',
@@ -220,14 +224,16 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
     setError(null);
     try {
       await meApi.changePassword({
-        current_password: currentPassword,
+        ...(hasPassword ? { current_password: currentPassword } : {}),
         new_password: newPassword,
       });
+      const updated = await meApi.getMe();
+      setUserData(updated);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setShowPasswordForm(false);
-      showSuccess(t('Пароль изменён', 'Құпия сөз өзгертілді'));
+      showSuccess(hasPassword ? t('Пароль изменён', 'Құпия сөз өзгертілді') : t('Пароль установлен', 'Құпия сөз орнатылды'));
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Неверный текущий пароль', 'Ағымдағы құпия сөз қате'));
     } finally {
@@ -351,8 +357,17 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <Lock className="w-5 h-5" />
-                    {t('Изменить пароль', 'Құпия сөзді өзгерту')}
+                    {hasPassword ? t('Изменить пароль', 'Құпия сөзді өзгерту') : t('Задать пароль', 'Құпия сөз орнату')}
                   </h3>
+                  {!hasPassword && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t(
+                        'Вы вошли через Google. Задайте пароль, чтобы также входить по email.',
+                        'Сіз Google арқылы кірдіңіз. Email арқылы да кіру үшін құпия сөз орнатыңыз.'
+                      )}
+                    </p>
+                  )}
+                  {hasPassword && (
                   <div>
                     <Label className="text-xs text-gray-600 dark:text-gray-400">{t('Текущий пароль', 'Ағымдағы құпия сөз')}</Label>
                     <div className="relative mt-1">
@@ -371,6 +386,7 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
                       </button>
                     </div>
                   </div>
+                  )}
                   <div>
                     <Label className="text-xs text-gray-600 dark:text-gray-400">{t('Новый пароль', 'Жаңа құпия сөз')}</Label>
                     <div className="relative mt-1">
@@ -434,13 +450,15 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
-                    <Button 
-                      onClick={handleSavePassword} 
-                      disabled={savingPassword || !currentPassword || !newPassword} 
+                    <Button
+                      onClick={handleSavePassword}
+                      disabled={savingPassword || !newPassword || (hasPassword && !currentPassword)}
                       className="bg-purple-600 hover:bg-purple-700 rounded-xl"
                     >
                       <Lock className="w-4 h-4 mr-2" />
-                      {savingPassword ? t('Сохранение...', 'Сақтау...') : t('Изменить пароль', 'Құпия сөзді өзгерту')}
+                      {savingPassword
+                        ? t('Сохранение...', 'Сақтау...')
+                        : hasPassword ? t('Изменить пароль', 'Құпия сөзді өзгерту') : t('Задать пароль', 'Құпия сөз орнату')}
                     </Button>
                     <Button onClick={handleCancelPassword} variant="outline" className="rounded-xl dark:border-gray-600 dark:hover:bg-gray-700">
                       <X className="w-4 h-4 mr-2" />
@@ -465,15 +483,23 @@ export function UserProfile({ setActiveSection, onOpenLesson }: UserProfileProps
                   <p className="text-gray-600 dark:text-gray-400 mb-3">
                     {userData?.email} • {t('Роль', 'Рөл')}: {userData?.role}
                   </p>
-                  <Button
-                    onClick={() => setShowPasswordForm(true)}
-                    variant="outline"
-                    size="sm"
-                    className="rounded-xl dark:border-gray-600 dark:hover:bg-gray-700 mb-4"
-                  >
-                    <Lock className="w-4 h-4 mr-2" />
-                    {t('Изменить пароль', 'Құпия сөзді өзгерту')}
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <Button
+                      onClick={() => setShowPasswordForm(true)}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl dark:border-gray-600 dark:hover:bg-gray-700"
+                    >
+                      <Lock className="w-4 h-4 mr-2" />
+                      {hasPassword ? t('Изменить пароль', 'Құпия сөзді өзгерту') : t('Задать пароль', 'Құпия сөз орнату')}
+                    </Button>
+                    {googleConnected && (
+                      <Badge variant="secondary" className="rounded-xl gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        {t('Вход через Google', 'Google арқылы кіру')}
+                      </Badge>
+                    )}
+                  </div>
 
                   {/* Статистика */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

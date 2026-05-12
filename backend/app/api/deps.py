@@ -93,6 +93,8 @@ def user_to_response(user: User):
         role=user.role,
         created_at=user.created_at,
         updated_at=user.updated_at,
+        has_password=bool(user.password_hash),
+        google_connected=bool(user.google_id),
     )
 
 

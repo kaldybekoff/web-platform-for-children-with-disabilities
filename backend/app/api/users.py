@@ -105,16 +105,25 @@ def change_password(
     current_user: CurrentUser,
     session: Session = Depends(get_session),
 ):
-    """Change current user's password. Requires current password verification.
+    """Set or change the current user's password.
+
+    - Accounts that already have a password must supply the correct
+      `current_password`.
+    - OAuth-only accounts (signed up via Google, `password_hash` empty) may
+      omit `current_password` — this sets a password for the first time so the
+      user can also sign in by email.
 
     (The full account-compromise reset path is `POST /api/auth/reset-password`,
     which also bumps `token_version` to revoke every existing session.)
     """
-    if not verify_password(body.current_password, current_user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Current password is incorrect",
-        )
+    if current_user.password_hash:
+        if not body.current_password or not verify_password(
+            body.current_password, current_user.password_hash
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect",
+            )
 
     current_user.password_hash = hash_password(body.new_password)
     current_user.updated_at = datetime.utcnow()

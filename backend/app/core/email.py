@@ -87,23 +87,22 @@ _RESET_HTML = """\
         <tr>
           <td style="padding:36px 40px;">
             <h2 style="margin:0 0 12px;color:#111827;font-size:20px;">
-              Сброс пароля
+              {heading}
             </h2>
             <p style="color:#374151;line-height:1.6;margin:0 0 24px;">
-              Привет, {name}! Мы получили запрос на сброс пароля для вашего аккаунта.
-              Нажмите на кнопку ниже, чтобы задать новый пароль.
+              Привет, {name}! {intro}
             </p>
             <div style="text-align:center;margin:0 0 28px;">
               <a href="{url}"
                  style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#3b82f6);
                         color:#fff;padding:14px 32px;border-radius:8px;
                         text-decoration:none;font-size:16px;font-weight:600;">
-                Сбросить пароль
+                {cta}
               </a>
             </div>
             <p style="color:#6b7280;font-size:13px;line-height:1.5;margin:0;">
               Ссылка действительна <strong>1 час</strong>.<br>
-              Если вы не запрашивали сброс пароля — просто проигнорируйте это письмо.
+              {ignore_note}
             </p>
           </td>
         </tr>
@@ -186,12 +185,37 @@ async def send_verification_email(to_email: str, name: str, token: str) -> None:
         raise
 
 
-async def send_password_reset_email(to_email: str, name: str, token: str) -> None:
+async def send_password_reset_email(
+    to_email: str, name: str, token: str, *, is_new: bool = False
+) -> None:
+    """Send the password-reset email.
+
+    `is_new=True` is used for OAuth-only accounts that don't have a password
+    yet — the copy then reads as "set a password" instead of "reset".
+    """
     reset_url = f"{settings.frontend_url.rstrip('/')}?reset_token={token}"
-    html = _RESET_HTML.format(name=name or to_email, url=reset_url)
+    if is_new:
+        subject = "Установка пароля — QazEdu Special"
+        copy = dict(
+            heading="Установка пароля",
+            intro=("Вы вошли через Google, и у вашего аккаунта ещё нет пароля. "
+                   "Нажмите на кнопку ниже, чтобы задать пароль и входить также по email."),
+            cta="Задать пароль",
+            ignore_note="Если вы не запрашивали это — просто проигнорируйте письмо.",
+        )
+    else:
+        subject = "Сброс пароля — QazEdu Special"
+        copy = dict(
+            heading="Сброс пароля",
+            intro=("Мы получили запрос на сброс пароля для вашего аккаунта. "
+                   "Нажмите на кнопку ниже, чтобы задать новый пароль."),
+            cta="Сбросить пароль",
+            ignore_note="Если вы не запрашивали сброс пароля — просто проигнорируйте это письмо.",
+        )
+    html = _RESET_HTML.format(name=name or to_email, url=reset_url, **copy)
     try:
-        await _send(to_email, "Сброс пароля — QazEdu Special", html)
-        logger.info("Password reset email sent to %s", to_email)
+        await _send(to_email, subject, html)
+        logger.info("Password reset email sent to %s (is_new=%s)", to_email, is_new)
     except Exception:
         logger.exception("Failed to send password reset email to %s", to_email)
         raise

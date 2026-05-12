@@ -264,16 +264,22 @@ async def forgot_password(
     body: ForgotPasswordRequest,
     session: Session = Depends(get_session),
 ) -> dict:
-    """Send a password-reset email. Always 200 to prevent email enumeration."""
+    """Send a password-reset email. Always 200 to prevent email enumeration.
+
+    Works for OAuth-only accounts too: they have no password yet, so the email
+    is worded as "set a password" — this gives Google users a way back in if
+    they ever lose access to their Google account.
+    """
     user = session.exec(select(User).where(User.email == body.email)).first()
-    if user and user.password_hash:  # OAuth-only users have no password to reset
+    if user:
+        is_new = not user.password_hash  # OAuth-only account — has no password yet
         token = _assign_reset_token(user)
         session.add(user)
         session.commit()
         name = f"{user.first_name} {user.last_name}".strip() or user.email
         if settings.email_verification_enabled:
             try:
-                await send_password_reset_email(user.email, name, token)
+                await send_password_reset_email(user.email, name, token, is_new=is_new)
             except Exception as e:
                 logger.error("Failed to send password reset email to %s: %s", user.email, e)
 
