@@ -319,7 +319,9 @@ async def google_login(request: Request) -> RedirectResponse:
     if not settings.google_oauth_enabled:
         raise HTTPException(status_code=501, detail="Google OAuth is not configured.")
     redirect_uri = f"{settings.backend_url.rstrip('/')}/api/auth/google/callback"
-    return await _oauth.google.authorize_redirect(request, redirect_uri)
+    # always show the account picker, even if the browser has a single signed-in
+    # Google account — avoids silently logging in with the wrong account
+    return await _oauth.google.authorize_redirect(request, redirect_uri, prompt="select_account")
 
 
 @router.get("/google/callback")
