@@ -79,6 +79,9 @@
 
 При превышении — `429 Too Many Requests`.
 
+Ключ лимита — реальный IP клиента: за Render/Cloudflare он берётся из `CF-Connecting-IP`
+или первого хопа `X-Forwarded-For` (`client_ip` в `limiter.py`), а не из адреса прокси.
+
 ---
 
 ## 7. Security Headers
@@ -123,7 +126,7 @@ font-src 'self' data: https://cdn.jsdelivr.net;
 
 | Ресурс | Ограничение |
 |--------|-------------|
-| `POST /api/auth/register` с `role=admin` | запрещено — `403` |
+| `POST /api/auth/register` с `role` ≠ `student` | запрещено — `403` (роли `teacher`/`admin` назначаются только через админку) |
 | `/api/admin/*` | только admin |
 | Создание / редактирование курсов, уроков, тестов | только teacher-владелец или admin |
 | Удаление поста сообщества | автор или admin |

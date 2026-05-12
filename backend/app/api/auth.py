@@ -40,7 +40,9 @@ def _set_auth_cookie(response, token: str) -> None:
         value=token,
         httponly=True,
         secure=True,
-        samesite="none",
+        # frontend (qazedu.uk) and API (api.qazedu.uk) are the same site,
+        # so "lax" is enough — and it blocks the cookie on cross-site requests.
+        samesite="lax",
         max_age=_COOKIE_MAX_AGE,
         path="/",
     )
@@ -91,9 +93,10 @@ async def register(
     body: UserCreate,
     session: Session = Depends(get_session),
 ) -> RegisterResponse:
-    if body.role == "admin":
+    if body.role != "student":
+        # teacher / admin are privileged roles — never granted via self-registration
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Admin accounts cannot be created through registration")
+                            detail="Only student accounts can be created through registration")
 
     existing = session.exec(select(User).where(User.email == body.email)).first()
     if existing:
@@ -158,7 +161,7 @@ async def login(
 @router.post("/logout")
 async def logout():
     resp = JSONResponse(content={"message": "Logged out"})
-    resp.delete_cookie(key="access_token", httponly=True, secure=True, samesite="none", path="/")
+    resp.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax", path="/")
     return resp
 
 
