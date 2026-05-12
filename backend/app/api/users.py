@@ -1,4 +1,6 @@
-from datetime import datetime
+import logging
+import secrets
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -6,6 +8,8 @@ from pydantic import BaseModel
 from sqlmodel import Session, select, func
 
 from app.api.deps import CurrentUser, user_to_response
+from app.core.config import settings
+from app.core.email import send_verification_email
 from app.db.session import get_session
 from app.models.user import User
 from app.models.enrollment import Enrollment
@@ -14,6 +18,10 @@ from app.models.lesson_progress import LessonProgress
 from app.models.quiz import QuizAttempt
 from app.schemas.user import UserResponse, UserUpdate, PasswordChange
 from app.core.security import hash_password, verify_password
+
+logger = logging.getLogger(__name__)
+
+_VERIFY_TTL_HOURS = 24
 
 router = APIRouter(tags=["users"])
 
@@ -48,13 +56,18 @@ def get_me(current_user: CurrentUser):
 
 
 @router.patch("/me", response_model=UserResponse)
-def update_me(
+async def update_me(
     body: UserUpdate,
     current_user: CurrentUser,
     session: Session = Depends(get_session),
 ):
-    """Update current user's first_name, last_name, email."""
-    if body.email is not None:
+    """Update current user's first_name, last_name, email.
+
+    Changing the email re-triggers verification: the account is marked
+    unverified and a new verification link is sent to the new address.
+    """
+    email_changed = False
+    if body.email is not None and body.email != current_user.email:
         other = session.exec(select(User).where(User.email == body.email, User.id != current_user.id)).first()
         if other:
             raise HTTPException(
@@ -62,6 +75,11 @@ def update_me(
                 detail="Email already in use",
             )
         current_user.email = body.email
+        email_changed = True
+        if settings.email_verification_enabled:
+            current_user.is_verified = False
+            current_user.verification_token = secrets.token_urlsafe(32)
+            current_user.verification_token_expires = datetime.utcnow() + timedelta(hours=_VERIFY_TTL_HOURS)
     if body.first_name is not None:
         current_user.first_name = body.first_name
     if body.last_name is not None:
@@ -70,6 +88,14 @@ def update_me(
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
+
+    if email_changed and settings.email_verification_enabled and current_user.verification_token:
+        name = f"{current_user.first_name} {current_user.last_name}".strip() or current_user.email
+        try:
+            await send_verification_email(current_user.email, name, current_user.verification_token)
+        except Exception as e:
+            logger.error("Failed to send verification email to %s: %s", current_user.email, e)
+
     return user_to_response(current_user)
 
 
@@ -79,18 +105,22 @@ def change_password(
     current_user: CurrentUser,
     session: Session = Depends(get_session),
 ):
-    """Change current user's password. Requires current password verification."""
+    """Change current user's password. Requires current password verification.
+
+    (The full account-compromise reset path is `POST /api/auth/reset-password`,
+    which also bumps `token_version` to revoke every existing session.)
+    """
     if not verify_password(body.current_password, current_user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect",
         )
-    
+
     current_user.password_hash = hash_password(body.new_password)
     current_user.updated_at = datetime.utcnow()
     session.add(current_user)
     session.commit()
-    
+
     return {"message": "Password changed successfully"}
 
 

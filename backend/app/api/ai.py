@@ -1,11 +1,15 @@
 """AI Chat endpoint using Google Gemini API."""
 
+import logging
+
 from fastapi import APIRouter, HTTPException, Request, status, Depends
 from pydantic import BaseModel
 
 from app.api.deps import CurrentUser
 from app.core.config import settings
 from app.core.limiter import limiter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -77,13 +81,15 @@ async def chat_with_ai(
             detail="AI library not installed",
         )
     except Exception as e:
-        error_message = str(e)
-        if "API_KEY" in error_message.upper() or "AUTHENTICATION" in error_message.upper():
+        # Log the real error server-side; never echo upstream exception text to the client.
+        logger.exception("AI chat request failed")
+        error_message = str(e).upper()
+        if "API_KEY" in error_message or "AUTHENTICATION" in error_message:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="AI service authentication error",
+                detail="AI service is temporarily unavailable",
             )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"AI service error: {error_message[:100]}",
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="AI service error, please try again later",
         )

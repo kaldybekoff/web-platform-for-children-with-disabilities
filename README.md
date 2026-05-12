@@ -119,6 +119,7 @@ web-platform-for-children-with-disabilities/
 | POST | `/register` | Регистрация (роль `admin` запрещена) | 5/мин |
 | POST | `/login` | Вход — устанавливает HTTP-only cookie, возвращает CSRF-токен | 10/мин |
 | POST | `/logout` | Выход — удаляет cookie | — |
+| GET | `/session` | CSRF-токен + текущий пользователь (читается из cookie; используется после Google OAuth) | — |
 | GET | `/verify?token=` | Подтверждение email | — |
 | POST | `/resend-verification` | Повторная отправка письма | 3/мин |
 | POST | `/forgot-password` | Запрос сброса пароля | 3/мин |

@@ -11,7 +11,13 @@ from sqlmodel import Session, select
 from app.core.config import settings
 from app.core.email import send_password_reset_email, send_verification_email
 from app.core.limiter import limiter
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.security import (
+    DUMMY_PASSWORD_HASH,
+    create_access_token,
+    decode_access_token_full,
+    hash_password,
+    verify_password,
+)
 from app.db.session import get_session
 from app.models.user import User
 
@@ -46,6 +52,8 @@ def _set_auth_cookie(response, token: str) -> None:
         max_age=_COOKIE_MAX_AGE,
         path="/",
     )
+
+
 
 # --- Google OAuth client (lazy-initialized only when credentials are set) ---
 _oauth = OAuth()
@@ -140,7 +148,13 @@ async def login(
     session: Session = Depends(get_session),
 ):
     user = session.exec(select(User).where(User.email == body.email)).first()
-    if not user or not verify_password(body.password, user.password_hash):
+    if not user:
+        # spend ~the same time as a real bcrypt check so a missing account
+        # isn't distinguishable by response timing
+        verify_password(body.password, DUMMY_PASSWORD_HASH)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Incorrect email or password")
+    if not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Incorrect email or password")
 
@@ -150,7 +164,7 @@ async def login(
             detail="Email not verified. Please check your inbox and click the verification link.",
         )
 
-    access_token, csrf_token = create_access_token(str(user.id))
+    access_token, csrf_token = create_access_token(str(user.id), user.token_version)
     resp = JSONResponse(content=jsonable_encoder(
         LoginResponse(csrf_token=csrf_token, user=user_to_response(user))
     ))
@@ -163,6 +177,30 @@ async def logout():
     resp = JSONResponse(content={"message": "Logged out"})
     resp.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax", path="/")
     return resp
+
+
+@router.get("/session")
+async def session_info(request: Request, session: Session = Depends(get_session)):
+    """Return the current session's CSRF token + user, read from the auth cookie.
+
+    The SPA calls this right after the Google OAuth redirect so the CSRF token
+    never has to travel in the URL. Safe to expose: cross-origin callers can't
+    read the response (CORS) even though the cookie is sent.
+    """
+    token = request.cookies.get("access_token")
+    decoded = decode_access_token_full(token) if token else None
+    if not decoded:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    user_id_str, csrf, token_version = decoded
+    try:
+        user = session.get(User, int(user_id_str))
+    except (ValueError, TypeError):
+        user = None
+    if not user or user.token_version != token_version:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
+    return JSONResponse(content=jsonable_encoder(
+        LoginResponse(csrf_token=csrf, user=user_to_response(user))
+    ))
 
 
 # ---------------------------------------------------------------------------
@@ -260,6 +298,7 @@ async def reset_password(
     user.reset_token = None
     user.reset_token_expires = None
     user.is_verified = True  # verify account if it wasn't (edge case)
+    user.token_version += 1  # invalidate any sessions issued before the reset
     session.add(user)
     session.commit()
     return {"message": "Password updated successfully."}
@@ -320,7 +359,9 @@ async def google_callback(
         session.add(user)
         session.commit()
 
-    access_token, csrf_token = create_access_token(str(user.id))
-    resp = RedirectResponse(url=f"{frontend}?csrf_token={csrf_token}", status_code=302)
+    access_token, _csrf_token = create_access_token(str(user.id), user.token_version)
+    # Don't put the CSRF token in the URL (browser history / Referer / access
+    # logs). The SPA fetches it from GET /api/auth/session after landing here.
+    resp = RedirectResponse(url=f"{frontend}?google=1", status_code=302)
     _set_auth_cookie(resp, access_token)
     return resp

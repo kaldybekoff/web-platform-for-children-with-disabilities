@@ -18,6 +18,8 @@ class User(SQLModel, table=True):
     last_name: str = Field(default="")
     role: str = Field(default="student")  # values: student, teacher, admin
     is_verified: bool = Field(default=False)
+    # bumped on password change / reset — invalidates all previously issued JWTs
+    token_version: int = Field(default=0)
     verification_token: str | None = Field(default=None, index=True)
     verification_token_expires: datetime | None = Field(default=None)
     google_id: str | None = Field(default=None, index=True)

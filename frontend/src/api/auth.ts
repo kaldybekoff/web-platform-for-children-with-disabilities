@@ -13,6 +13,11 @@ export async function login(body: UserLogin): Promise<LoginResponse> {
   });
 }
 
+/** Current session info (CSRF token + user) read from the auth cookie — used after Google OAuth. */
+export async function getSession(): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>('/auth/session');
+}
+
 export async function logout(): Promise<void> {
   await apiRequest<void>('/auth/logout', { method: 'POST' });
 }

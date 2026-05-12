@@ -28,7 +28,7 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
-    user_id_str, csrf_in_token = result
+    user_id_str, csrf_in_token, token_version = result
 
     if request.method not in _SAFE_METHODS:
         csrf_header = request.headers.get(_CSRF_HEADER, "")
@@ -46,6 +46,9 @@ def get_current_user(
     user = session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if user.token_version != token_version:
+        # password changed / reset since this token was issued
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
     return user
 
 

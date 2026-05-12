@@ -19,7 +19,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
+        # X-XSS-Protection is deprecated and the legacy auditor has itself been a
+        # source of vulnerabilities — explicitly disable it instead of enabling it.
+        response.headers["X-XSS-Protection"] = "0"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         # Permissive CSP that allows the React SPA + external media (YouTube, images)
         response.headers["Content-Security-Policy"] = (

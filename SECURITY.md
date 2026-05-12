@@ -9,10 +9,14 @@
 **Файл:** `backend/app/core/security.py`
 
 - Алгоритм: HS256
-- Поля токена: `sub` (ID пользователя), `exp` (7 дней)
+- Поля токена: `sub` (ID пользователя), `exp` (7 дней), `csrf` (см. §13), `tv` (token_version)
 - Токен подписывается `SECRET_KEY` из переменных окружения
 - Декодирование и проверка на каждом защищённом запросе — `get_current_user` в `backend/app/api/deps.py`
-- При невалидном или отсутствующем токене — `401 Unauthorized` с заголовком `WWW-Authenticate: Bearer`
+- **Отзыв сессий:** у пользователя есть `token_version`; он инкрементируется при сбросе пароля
+  (`POST /api/auth/reset-password`), и токены, выпущенные раньше, перестают приниматься (`401`)
+- При невалидном/отсутствующем/устаревшем токене — `401 Unauthorized`
+- Тайминг входа выровнен: при несуществующем email выполняется фиктивная bcrypt-проверка
+  (`DUMMY_PASSWORD_HASH`), чтобы ответ нельзя было отличить по времени (анти-энумерация)
 
 ---
 
@@ -35,6 +39,7 @@
 - Вход заблокирован при `is_verified=False` → `403 Forbidden`
 - После перехода по ссылке токен обнуляется, `is_verified=True`
 - Повторная отправка: лимит 3 запроса/мин
+- Смена email через `PATCH /api/me` сбрасывает `is_verified` и шлёт новую ссылку на новый адрес
 
 ---
 
@@ -45,6 +50,7 @@
 - `POST /api/auth/forgot-password` — всегда возвращает `200 OK` (защита от перебора email-адресов)
 - `reset_token` с TTL 1 час
 - После использования токен обнуляется
+- После сброса инкрементируется `token_version` → все ранее выпущенные сессии аннулируются
 - Лимиты: 3 запроса/мин на `forgot-password`, 5 запросов/мин на `reset-password`
 
 ---
@@ -59,6 +65,8 @@
 - Redirect URI формируется как `{BACKEND_URL}/api/auth/google/callback` и должен быть
   заранее зарегистрирован в Google Cloud Console (иначе `redirect_uri_mismatch`);
   в продакшене — `https://api.qazedu.uk/api/auth/google/callback`
+- После колбэка бэкенд редиректит на `{FRONTEND_URL}?google=1` **без токенов в URL**;
+  CSRF-токен SPA получает запросом `GET /api/auth/session` (читается из HttpOnly-cookie)
 - Client ID / Client Secret хранятся только в переменных окружения
 
 ---
@@ -95,7 +103,7 @@
 |-----------|----------|
 | `X-Content-Type-Options` | `nosniff` |
 | `X-Frame-Options` | `DENY` |
-| `X-XSS-Protection` | `1; mode=block` |
+| `X-XSS-Protection` | `0` (устаревший legacy-auditor явно отключён) |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `Content-Security-Policy` | см. ниже |
 
@@ -194,7 +202,8 @@ font-src 'self' data: https://cdn.jsdelivr.net;
 - Все запросы отправляются с `credentials: 'include'` — cookie автоматически прикрепляется браузером
 - При `401` — CSRF-токен и данные пользователя очищаются, пользователь разлогинивается
 - Ролевая защита UI (страницы admin / teacher) — дополнительный слой; основная защита на backend
-- Google OAuth callback передаёт `csrf_token` в URL-параметре; JWT устанавливается в HttpOnly cookie
+- После Google OAuth callback бэкенд ставит JWT в HttpOnly cookie и редиректит на `?google=1`;
+  CSRF-токен SPA забирает запросом `GET /api/auth/session` — в URL он не попадает
 
 ---
 

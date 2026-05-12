@@ -6,7 +6,7 @@ import { Card } from './ui/card';
 import { Label } from './ui/label';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth, ADMIN_NOT_ALLOWED } from '../contexts/AuthContext';
-import { resendVerification, forgotPassword, resetPassword } from '../api/auth';
+import { resendVerification, forgotPassword, resetPassword, getSession } from '../api/auth';
 import { getApiUrl } from '../api/client';
 import type { UserRole } from '../api/types';
 
@@ -75,10 +75,20 @@ export function AuthPage() {
     else if (v === 'expired') setBanner('verified-expired');
     else if (v === 'error') setBanner('verified-error');
 
+    // After Google OAuth the backend redirects with ?google=1 (no token in the
+    // URL) — fetch the CSRF token from the session cookie via the API instead.
+    const g = params.get('google');
+    if (g) {
+      getSession()
+        .then(s => loginWithToken(s.csrf_token))
+        .catch(() => setBanner('google-error'));
+    }
+
+    // Legacy URL-param path (kept for backwards compatibility)
     const csrfToken = params.get('csrf_token');
     const authToken = params.get('auth_token');
-    if (csrfToken) loginWithToken(csrfToken);
-    else if (authToken) loginWithToken(authToken);
+    if (!g && csrfToken) loginWithToken(csrfToken);
+    else if (!g && authToken) loginWithToken(authToken);
 
     const rt = params.get('reset_token');
     if (rt) { setResetToken(rt); setCurrentView('new-password'); }
@@ -86,7 +96,7 @@ export function AuthPage() {
     const ae = params.get('auth_error');
     if (ae) setBanner('google-error');
 
-    if (v || csrfToken || authToken || rt || ae) window.history.replaceState({}, '', window.location.pathname);
+    if (v || csrfToken || authToken || rt || ae || g) window.history.replaceState({}, '', window.location.pathname);
   }, [loginWithToken]);
 
   const handleInputChange = (field: string, value: string) => {
