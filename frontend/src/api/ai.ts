@@ -8,9 +8,9 @@ export interface ChatResponse {
   reply: string;
 }
 
-export async function sendAIMessage(message: string): Promise<ChatResponse> {
+export async function sendAIMessage(message: string, lessonContext?: string): Promise<ChatResponse> {
   return apiRequest<ChatResponse>('/ai/chat', {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, lesson_context: lessonContext }),
   });
 }

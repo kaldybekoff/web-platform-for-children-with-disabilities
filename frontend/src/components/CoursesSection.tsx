@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Play, Clock, Star, Search, BookOpen, CheckCircle, Trophy } from 'lucide-react';
+import { Play, Star, Search, BookOpen, Trophy } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
@@ -10,7 +10,6 @@ import * as lessonsApi from '../api/lessons';
 import type { CourseResponse, EnrollmentWithCourseResponse } from '../api/types';
 
 interface CoursesSectionProps {
-  setActiveSection: (section: string) => void;
   onOpenLesson: (courseId: number) => void;
 }
 
@@ -20,7 +19,7 @@ const levelLabels: Record<string, { ru: string; kz: string }> = {
   advanced: { ru: 'Продвинутый', kz: 'Жоғары' },
 };
 
-export function CoursesSection({ setActiveSection, onOpenLesson }: CoursesSectionProps) {
+export function CoursesSection({ onOpenLesson }: CoursesSectionProps) {
   const { t } = useLanguage();
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [myEnrollments, setMyEnrollments] = useState<EnrollmentWithCourseResponse[]>([]);

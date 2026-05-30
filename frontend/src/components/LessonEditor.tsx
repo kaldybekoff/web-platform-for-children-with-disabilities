@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, FileText, Hand, Clock, X, Save } from 'lucide-react';
+import { Video, Hand, X, Save } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -7,7 +7,6 @@ import { Label } from './ui/label';
 import { useLanguage } from '../contexts/LanguageContext';
 import { QuizEditor } from './QuizEditor';
 import * as lessonsApi from '../api/lessons';
-import type { LessonResponse } from '../api/types';
 
 interface LessonEditorProps {
   lessonId: number;
@@ -17,7 +16,6 @@ interface LessonEditorProps {
 
 export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) {
   const { t } = useLanguage();
-  const [lesson, setLesson] = useState<LessonResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +39,6 @@ export function LessonEditor({ lessonId, onClose, onSaved }: LessonEditorProps) 
     setLoading(true);
     try {
       const data = await lessonsApi.getLesson(lessonId);
-      setLesson(data);
       setTitle(data.title);
       setContent(data.content);
       setVideoUrl(data.video_url || '');

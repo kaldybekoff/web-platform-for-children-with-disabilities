@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Check, X, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Check, X } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as quizzesApi from '../api/quizzes';
-import type { QuizResponse, QuestionResponse, AnswerResponse } from '../api/types';
+import type { QuizResponse } from '../api/types';
 
 interface NewAnswerOption {
   text_ru: string;

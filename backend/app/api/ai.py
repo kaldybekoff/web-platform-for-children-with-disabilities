@@ -16,6 +16,7 @@ router = APIRouter(prefix="/ai", tags=["ai"])
 
 class ChatRequest(BaseModel):
     message: str
+    lesson_context: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -59,13 +60,17 @@ async def chat_with_ai(
     
     try:
         from google import genai
-        
+
         client = genai.Client(api_key=gemini_api_key)
-        
+
+        system = SYSTEM_PROMPT
+        if body.lesson_context and body.lesson_context.strip():
+            system += f"\n\nКонтекст текущего урока:\n{body.lesson_context.strip()[:2000]}"
+
         response = client.models.generate_content(
             model="gemini-2.5-flash-lite",
             contents=[
-                {"role": "user", "parts": [{"text": SYSTEM_PROMPT}]},
+                {"role": "user", "parts": [{"text": system}]},
                 {"role": "model", "parts": [{"text": "Понял! Я готов помочь студентам QazEdu с их учебными вопросами."}]},
                 {"role": "user", "parts": [{"text": body.message.strip()}]},
             ],

@@ -1,10 +1,11 @@
 """Community API: Success posts CRUD."""
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
 from sqlmodel import Session, select, func
 
 from app.api.deps import CurrentUser
+from app.core.limiter import limiter
 from app.db.session import get_session
 from app.models.success_post import SuccessPost, SuccessPostLike
 from app.models.user import User
@@ -55,7 +56,9 @@ def list_success_posts(
 
 
 @router.post("/posts", response_model=SuccessPostResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 def create_success_post(
+    request: Request,
     body: SuccessPostCreate,
     current_user: CurrentUser,
     session: Session = Depends(get_session),

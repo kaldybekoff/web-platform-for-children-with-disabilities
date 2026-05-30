@@ -17,13 +17,6 @@ import { Footer } from './components/Footer';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import type { UserRole } from './api/types';
-
-const defaultSectionByRole: Record<UserRole, string> = {
-  student: 'home',
-  teacher: 'home',
-  admin: 'home',
-};
 
 function AppContent() {
   const { isAuthenticated, userRole, logout, loading } = useAuth();
@@ -74,11 +67,11 @@ function AppContent() {
             <>
               <Hero setActiveSection={setActiveSection} />
               <FeaturesSection />
-              <CoursesSection setActiveSection={setActiveSection} onOpenLesson={openLesson} />
+              <CoursesSection onOpenLesson={openLesson} />
             </>
           )}
           {activeSection === 'news' && <NewsPage />}
-          {activeSection === 'courses' && <CoursesSection setActiveSection={setActiveSection} onOpenLesson={openLesson} />}
+          {activeSection === 'courses' && <CoursesSection onOpenLesson={openLesson} />}
           {activeSection === 'lesson' && (
             <InteractiveLessonDemo
               courseId={selectedCourseId}
@@ -96,6 +89,7 @@ function AppContent() {
       {userRole === 'teacher' && (
         <>
           {activeSection === 'home' && <TeacherHome setActiveSection={setActiveSection} />}
+          {activeSection === 'news' && <NewsPage />}
           {activeSection === 'courses' && <TeacherCourses onOpenLesson={openLesson} />}
           {activeSection === 'lesson' && (
             <InteractiveLessonDemo

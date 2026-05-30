@@ -83,12 +83,21 @@
 | `POST /api/auth/resend-verification` | 3 запроса/мин |
 | `POST /api/auth/forgot-password` | 3 запроса/мин |
 | `POST /api/auth/reset-password` | 5 запросов/мин |
+| `POST /api/me/password` | 5 запросов/мин |
+| `POST /api/community/posts` | 10 запросов/мин |
 | `POST /api/ai/chat` | 10 запросов/мин |
 
 При превышении — `429 Too Many Requests`.
 
 Ключ лимита — реальный IP клиента: за Render/Cloudflare он берётся из `CF-Connecting-IP`
 или первого хопа `X-Forwarded-For` (`client_ip` в `limiter.py`), а не из адреса прокси.
+
+**Вход в админку** (`backend/app/admin/auth.py`) не проходит через slowapi (это не
+HTTP-route, а метод `AuthProvider`), поэтому защищён отдельным in-process счётчиком:
+после 5 неудачных попыток с одного IP за 5 минут вход блокируется. При несуществующем
+или беспарольном аккаунте выполняется фиктивная bcrypt-проверка (`DUMMY_PASSWORD_HASH`),
+а сообщение об ошибке всегда одинаковое — нельзя ни перебрать пароль, ни узнать,
+существует ли email и является ли он администратором.
 
 ---
 
@@ -105,12 +114,13 @@
 | `X-Frame-Options` | `DENY` |
 | `X-XSS-Protection` | `0` (устаревший legacy-auditor явно отключён) |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` (форсирует HTTPS, защита от SSL-strip) |
 | `Content-Security-Policy` | см. ниже |
 
-**CSP (backend):**
+**CSP (backend):** `'unsafe-eval'` намеренно отсутствует — продакшен-сборка его не требует.
 ```
 default-src 'self';
-script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
 style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
 img-src 'self' data: https:;
 media-src 'self' https:;

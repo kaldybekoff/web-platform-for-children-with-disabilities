@@ -35,7 +35,6 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
   // Attempts history state
   const [attempts, setAttempts] = useState<QuizAttemptResponse[]>([]);
   const [attemptsExpanded, setAttemptsExpanded] = useState(false);
-  const [loadingAttempts, setLoadingAttempts] = useState(false);
 
   useEffect(() => {
     loadQuiz();
@@ -64,14 +63,11 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
   };
 
   const loadAttempts = async (quizId: number) => {
-    setLoadingAttempts(true);
     try {
       const data = await quizzesApi.getMyAttempts(quizId);
       setAttempts(data);
     } catch {
       setAttempts([]);
-    } finally {
-      setLoadingAttempts(false);
     }
   };
 

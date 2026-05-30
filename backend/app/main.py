@@ -23,10 +23,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # source of vulnerabilities — explicitly disable it instead of enabling it.
         response.headers["X-XSS-Protection"] = "0"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        # Permissive CSP that allows the React SPA + external media (YouTube, images)
+        # Force HTTPS for two years incl. subdomains (api/admin) — blocks SSL-strip.
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+        # Permissive CSP that allows the React SPA + external media (YouTube, images).
+        # 'unsafe-eval' is intentionally NOT included — the production build doesn't need it.
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             "img-src 'self' data: https:; "
             "media-src 'self' https:; "

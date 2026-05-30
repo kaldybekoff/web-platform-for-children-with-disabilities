@@ -16,7 +16,7 @@ interface TeacherCoursesProps {
 }
 
 export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [lessonCounts, setLessonCounts] = useState<Record<number, number>>({});

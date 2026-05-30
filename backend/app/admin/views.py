@@ -124,9 +124,17 @@ class NewsView(ModelView):
         "updated_at",
     ]
     exclude_fields_from_list = ["content_ru", "content_kz"]
+    exclude_fields_from_create = ["id", "author_id", "media_type", "created_at", "updated_at"]
+    exclude_fields_from_edit = ["id", "author_id", "media_type", "created_at", "updated_at"]
     searchable_fields = ["title_ru", "title_kz"]
     sortable_fields = ["id", "is_published", "created_at"]
     actions = ["publish", "unpublish", "delete"]
+
+    async def before_create(self, request: Request, data: dict, obj: Any) -> None:
+        obj.author_id = request.state.admin_user.id
+
+    async def before_edit(self, request: Request, data: dict, obj: Any) -> None:
+        obj.updated_at = datetime.utcnow()
 
     async def _set_published(self, request: Request, pks: list[Any], value: bool) -> str:
         session = request.state.session

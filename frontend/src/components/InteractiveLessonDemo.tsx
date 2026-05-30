@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, ChevronRight, CheckCircle, XCircle, Hand, ArrowLeft } from 'lucide-react';
+import { Play, ChevronRight, CheckCircle, XCircle, Hand, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { Card } from './ui/card';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useLanguage } from '../contexts/LanguageContext';
 import { QuizPlayer } from './QuizPlayer';
+import { LessonAIAssistant } from './LessonAIAssistant';
 import * as lessonsApi from '../api/lessons';
 import * as progressApi from '../api/progress';
 import type { LessonResponse, LessonProgressResponse } from '../api/types';
@@ -99,9 +100,7 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
   const { t, language } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
-  const [videoDuration, setVideoDuration] = useState(0);
   const [lessons, setLessons] = useState<LessonResponse[]>([]);
   const [currentLesson, setCurrentLesson] = useState<LessonResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -183,43 +182,19 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
   const handleVideoTimeUpdate = () => {
     if (videoRef.current) {
       setVideoProgress(videoRef.current.currentTime);
-      setVideoDuration(videoRef.current.duration || 0);
     }
   };
 
   const handleVideoPlay = () => setIsPlaying(true);
   const handleVideoPause = () => setIsPlaying(false);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleQuizComplete = (passed: boolean, score: number) => {
+  const handleQuizComplete = (passed: boolean) => {
     setQuizPassed(passed);
     if (passed) {
       handleMarkComplete();
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-  
   // Demo quiz handlers
   const handleDemoQuizSelectAnswer = (questionId: number, answerId: number) => {
     if (demoQuizChecked[questionId]) return;
@@ -609,6 +584,9 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
               )}
             </Card>
           )}
+
+          {/* AI Помощник по уроку */}
+          <LessonAIAssistant lessonTitle={title} lessonContent={description} />
 
           {/* Прогресс урока */}
           <Card className="p-6 dark:bg-gray-800 dark:border-gray-700">

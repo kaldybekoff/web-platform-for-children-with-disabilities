@@ -133,7 +133,7 @@ web-platform-for-children-with-disabilities/
 |-------|------|----------|
 | GET | `/me` | Данные текущего пользователя |
 | PATCH | `/me` | Обновление имени / email |
-| POST | `/me/password` | Смена пароля |
+| POST | `/me/password` | Смена пароля (лимит 5/мин) |
 | GET | `/me/achievements` | Статистика достижений |
 | GET | `/me/study-friends` | Одногруппники по курсам |
 
@@ -190,7 +190,7 @@ web-platform-for-children-with-disabilities/
 | Метод | Путь | Описание | Роль |
 |-------|------|----------|------|
 | GET | `/news` | Опубликованные новости | auth |
-| GET/POST/DELETE | `/community/posts` | Лента успехов | auth |
+| GET/POST/DELETE | `/community/posts` | Лента успехов (POST — лимит 10/мин) | auth |
 | POST | `/community/posts/{id}/like` | Лайк / снять лайк | auth |
 | POST | `/ai/chat` | AI-ассистент (Gemini) | auth |
 | GET | `/teacher/stats` | Статистика преподавателя | teacher / admin |

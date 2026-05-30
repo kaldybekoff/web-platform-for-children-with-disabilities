@@ -24,6 +24,7 @@ const studentNav = [
 const teacherNav = [
   { id: 'home', icon: Home, labelRu: 'Главная', labelKz: 'Басты бет' },
   { id: 'courses', icon: BookOpen, labelRu: 'Мои курсы', labelKz: 'Менің курстарым' },
+  { id: 'news', icon: Newspaper, labelRu: 'Новости', labelKz: 'Жаңалықтар' },
   { id: 'students', icon: Users, labelRu: 'Ученики', labelKz: 'Оқушылар' },
   { id: 'profile', icon: User, labelRu: 'Профиль', labelKz: 'Профиль' },
   { id: 'community', icon: MessageCircle, labelRu: 'Сообщество', labelKz: 'Қоғамдастық' },

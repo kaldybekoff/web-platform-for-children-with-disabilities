@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Newspaper, Calendar, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Newspaper, Calendar, Play, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as newsApi from '../api/news';
 import type { NewsResponse } from '../api/types';
@@ -152,9 +152,24 @@ export function NewsPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-xs">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{formatDate(item.created_at)}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-xs">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>{formatDate(item.created_at)}</span>
+                    </div>
+
+                    {/* Кнопка "Читать источник" — когда media_url есть, но это не картинка и не YouTube */}
+                    {rawMediaUrl && !mediaType && (
+                      <a
+                        href={rawMediaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        {t('Читать источник', 'Дереккөзді оқу')}
+                      </a>
+                    )}
                   </div>
                 </div>
               </article>

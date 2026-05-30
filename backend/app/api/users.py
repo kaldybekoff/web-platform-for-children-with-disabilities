@@ -3,13 +3,14 @@ import secrets
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlmodel import Session, select, func
 
 from app.api.deps import CurrentUser, user_to_response
 from app.core.config import settings
 from app.core.email import send_verification_email
+from app.core.limiter import limiter
 from app.db.session import get_session
 from app.models.user import User
 from app.models.enrollment import Enrollment
@@ -100,7 +101,9 @@ async def update_me(
 
 
 @router.post("/me/password", status_code=status.HTTP_200_OK)
+@limiter.limit("5/minute")
 def change_password(
+    request: Request,
     body: PasswordChange,
     current_user: CurrentUser,
     session: Session = Depends(get_session),
