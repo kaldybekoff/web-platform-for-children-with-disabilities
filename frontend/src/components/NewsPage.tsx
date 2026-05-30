@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Newspaper, Calendar, Play, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { Newspaper, Calendar, Play, ChevronLeft, ChevronRight, ExternalLink, Search } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as newsApi from '../api/news';
 import type { NewsResponse } from '../api/types';
@@ -18,20 +18,21 @@ export function NewsPage() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expandedVideo, setExpandedVideo] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   useEffect(() => {
-    setLoading(true);
-    setExpandedVideo(null);
-    newsApi.listNews({ limit: PAGE_SIZE, offset: page * PAGE_SIZE })
-      .then((data) => {
-        setNews(data.news);
-        setTotal(data.total);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [page]);
+    const timer = setTimeout(() => {
+      setLoading(true);
+      setExpandedVideo(null);
+      newsApi.listNews({ limit: PAGE_SIZE, offset: page * PAGE_SIZE, search: searchQuery })
+        .then((data) => { setNews(data.news); setTotal(data.total); })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [page, searchQuery]);
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString(language === 'kz' ? 'kk-KZ' : 'ru-RU', {
@@ -55,6 +56,20 @@ export function NewsPage() {
             {t(`Всего: ${total}`, `Барлығы: ${total}`)}
           </span>
         )}
+      </div>
+
+      {/* Поиск */}
+      <div className="relative max-w-md mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+          placeholder={t('Поиск по новостям...', 'Жаңалықтарды іздеу...')}
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-600
+                     bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm
+                     placeholder-gray-400 focus:outline-none focus:border-purple-400 transition-colors"
+        />
       </div>
 
       {/* Список новостей */}

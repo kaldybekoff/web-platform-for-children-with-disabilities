@@ -1,5 +1,5 @@
 """Course management API. Students can view; teachers can create/manage their own; admin can manage all."""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser, require_teacher
@@ -36,9 +36,17 @@ def _can_manage_course(user: User, course: Course) -> bool:
 def list_courses(
     current_user: CurrentUser,
     session: Session = Depends(get_session),
+    search: str = Query(default="", max_length=100),
+    level: str = Query(default=""),
 ):
-    """List all courses. Any authenticated user."""
-    courses = session.exec(select(Course).order_by(Course.created_at.desc())).all()
+    """List all courses with optional search and level filter."""
+    query = select(Course)
+    if search.strip():
+        term = f"%{search.strip()}%"
+        query = query.where(Course.title.ilike(term) | Course.description.ilike(term))
+    if level.strip():
+        query = query.where(Course.level == level.strip())
+    courses = session.exec(query.order_by(Course.created_at.desc())).all()
     return [course_to_response(c) for c in courses]
 
 

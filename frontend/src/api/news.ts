@@ -7,13 +7,13 @@ import type { NewsResponse, NewsListResponse } from './types';
 export async function listNews(params?: {
   limit?: number;
   offset?: number;
+  search?: string;
 }): Promise<NewsListResponse> {
-  const searchParams = new URLSearchParams();
-  if (params?.limit) searchParams.set('limit', String(params.limit));
-  if (params?.offset) searchParams.set('offset', String(params.offset));
-
-  const query = searchParams.toString();
-  return apiRequest<NewsListResponse>(`/news${query ? `?${query}` : ''}`);
+  const p: Record<string, string> = {};
+  if (params?.limit) p.limit = String(params.limit);
+  if (params?.offset) p.offset = String(params.offset);
+  if (params?.search?.trim()) p.search = params.search.trim();
+  return apiRequest<NewsListResponse>('/news', { params: Object.keys(p).length ? p : undefined });
 }
 
 export async function getNews(newsId: number): Promise<NewsResponse> {

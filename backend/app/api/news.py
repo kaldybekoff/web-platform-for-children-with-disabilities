@@ -20,10 +20,17 @@ def list_news(
     session: Session = Depends(get_session),
     limit: int = Query(10, ge=1, le=50),
     offset: int = Query(0, ge=0),
+    search: str = Query(default="", max_length=100),
 ):
-    """Get list of published news. Available to all authenticated users."""
-    query = select(News).where(News.is_published == True).order_by(News.created_at.desc())
-
+    """Get list of published news with optional search."""
+    query = select(News).where(News.is_published == True)
+    if search.strip():
+        term = f"%{search.strip()}%"
+        query = query.where(
+            News.title_ru.ilike(term) | News.title_kz.ilike(term) |
+            News.content_ru.ilike(term) | News.content_kz.ilike(term)
+        )
+    query = query.order_by(News.created_at.desc())
     total = session.exec(select(func.count()).select_from(query.subquery())).one()
     news = session.exec(query.offset(offset).limit(limit)).all()
 

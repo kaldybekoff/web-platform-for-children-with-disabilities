@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Play, Star, Search, BookOpen, Trophy } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -30,35 +30,51 @@ export function CoursesSection({ onOpenLesson }: CoursesSectionProps) {
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [lessonCounts, setLessonCounts] = useState<Record<number, number>>({});
 
-  useEffect(() => {
-    Promise.all([coursesApi.listCourses(), coursesApi.myCourses()])
-      .then(async ([list, enrollments]) => {
-        setCourses(list);
-        setMyEnrollments(enrollments);
-        const counts: Record<number, number> = {};
-        await Promise.all(
-          list.map(async (course) => {
-            try {
-              const lessons = await lessonsApi.listLessonsByCourse(course.id);
-              counts[course.id] = lessons.length;
-            } catch {
-              counts[course.id] = 0;
-            }
-          })
-        );
-        setLessonCounts(counts);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Ошибка загрузки'))
-      .finally(() => setLoading(false));
+  const loadCourses = useCallback(async (search: string, level: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [list, enrollments] = await Promise.all([
+        coursesApi.listCourses({
+          search: search.trim() || undefined,
+          level: level !== 'all' ? level : undefined,
+        }),
+        coursesApi.myCourses(),
+      ]);
+      setCourses(list);
+      setMyEnrollments(enrollments);
+      const counts: Record<number, number> = {};
+      await Promise.all(
+        list.map(async (course) => {
+          try {
+            const lessons = await lessonsApi.listLessonsByCourse(course.id);
+            counts[course.id] = lessons.length;
+          } catch {
+            counts[course.id] = 0;
+          }
+        })
+      );
+      setLessonCounts(counts);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const enrolledIds = new Set(myEnrollments.map((e) => e.course_id));
+  // Initial load
+  useEffect(() => {
+    loadCourses('', 'all');
+  }, [loadCourses]);
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
-    return matchesSearch && matchesLevel;
-  });
+  // Debounced search/filter — wait 350ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => loadCourses(searchQuery, levelFilter), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery, levelFilter, loadCourses]);
+
+  const enrolledIds = new Set(myEnrollments.map((e) => e.course_id));
+  const filteredCourses = courses;
 
   const handleEnroll = async (courseId: number) => {
     setEnrollingId(courseId);

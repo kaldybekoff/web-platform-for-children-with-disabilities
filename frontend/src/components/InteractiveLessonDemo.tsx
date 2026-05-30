@@ -7,6 +7,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useLanguage } from '../contexts/LanguageContext';
 import { QuizPlayer } from './QuizPlayer';
 import { LessonAIAssistant } from './LessonAIAssistant';
+import { LessonComments } from './LessonComments';
 import * as lessonsApi from '../api/lessons';
 import * as progressApi from '../api/progress';
 import type { LessonResponse, LessonProgressResponse } from '../api/types';
@@ -587,6 +588,9 @@ export function InteractiveLessonDemo({ courseId, lessonId, setActiveSection, on
 
           {/* AI Помощник по уроку */}
           <LessonAIAssistant lessonTitle={title} lessonContent={description} />
+
+          {/* Вопросы и ответы по уроку */}
+          {currentLesson && <LessonComments lessonId={currentLesson.id} />}
 
           {/* Прогресс урока */}
           <Card className="p-6 dark:bg-gray-800 dark:border-gray-700">

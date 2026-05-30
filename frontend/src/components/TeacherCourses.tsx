@@ -7,6 +7,7 @@ import { Label } from './ui/label';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { LessonEditor } from './LessonEditor';
+import { ImageUpload } from './ImageUpload';
 import * as coursesApi from '../api/courses';
 import * as lessonsApi from '../api/lessons';
 import type { CourseResponse, LessonResponse } from '../api/types';
@@ -265,16 +266,11 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                 />
               </div>
               <div>
-                <Label className="text-xs text-gray-400 mb-1 block">{t('Фото курса (URL)', 'Курс суреті (URL)')}</Label>
-                <Input
+                <ImageUpload
                   value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="h-10 rounded-lg bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-purple-500"
+                  onChange={setNewImageUrl}
+                  label={t('Фото курса', 'Курс суреті')}
                 />
-                {newImageUrl.trim() && (
-                  <img src={newImageUrl.trim()} alt="preview" className="mt-2 h-20 w-full object-cover rounded-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                )}
               </div>
               <div>
                 <Label className="text-xs text-gray-400 mb-1 block">{t('Уровень сложности', 'Қиындық деңгейі')}</Label>
@@ -333,7 +329,7 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                   </div>
                   <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="h-9 text-sm dark:bg-gray-700 dark:border-gray-600" placeholder={t('Название', 'Атауы')} />
                   <Input value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="h-9 text-sm dark:bg-gray-700 dark:border-gray-600" placeholder={t('Описание', 'Сипаттама')} />
-                  <Input value={newImageUrl} onChange={(e) => setNewImageUrl(e.target.value)} className="h-9 text-sm dark:bg-gray-700 dark:border-gray-600" placeholder="https://example.com/image.jpg" />
+                  <ImageUpload value={newImageUrl} onChange={setNewImageUrl} label={t('Фото курса', 'Курс суреті')} />
                   <select
                     value={newLevel}
                     onChange={(e) => setNewLevel(e.target.value)}

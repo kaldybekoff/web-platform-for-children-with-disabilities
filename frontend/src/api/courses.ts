@@ -15,8 +15,11 @@ export interface CourseUpdate {
   image_url?: string | null;
 }
 
-export async function listCourses(): Promise<CourseResponse[]> {
-  return apiRequest<CourseResponse[]>('/courses');
+export async function listCourses(params?: { search?: string; level?: string }): Promise<CourseResponse[]> {
+  const query: Record<string, string> = {};
+  if (params?.search) query.search = params.search;
+  if (params?.level) query.level = params.level;
+  return apiRequest<CourseResponse[]>('/courses', { params: Object.keys(query).length ? query : undefined });
 }
 
 export async function getCourse(courseId: number): Promise<CourseResponse> {
