@@ -98,8 +98,9 @@ def create_lesson(
     enrollments = session.exec(
         select(Enrollment).where(Enrollment.course_id == body.course_id)
     ).all()
+    created_any = False
     for enrollment in enrollments:
-        create_notification(
+        n = create_notification(
             session,
             user_id=enrollment.student_id,
             type="new_lesson",
@@ -107,7 +108,9 @@ def create_lesson(
             body=f"Доступен новый урок: «{lesson.title}»",
             lesson_id=lesson.id,
         )
-    if enrollments:
+        if n:
+            created_any = True
+    if created_any:
         session.commit()
 
     return lesson_to_response(lesson)

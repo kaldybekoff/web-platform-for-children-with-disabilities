@@ -134,8 +134,26 @@ def create_notification(
     title: str,
     body: str,
     lesson_id: int | None = None,
-) -> Notification:
-    """Create and persist a notification. Does NOT commit — caller must commit."""
+) -> Notification | None:
+    """Create and persist a notification. Does NOT commit — caller must commit.
+
+    Returns None if an identical notification already exists within the last
+    5 minutes (dedup guard against double-submits / retries).
+    """
+    from datetime import timedelta
+    cutoff = datetime.utcnow() - timedelta(minutes=5)
+    existing = session.exec(
+        select(Notification).where(
+            Notification.user_id == user_id,
+            Notification.type == type,
+            Notification.lesson_id == lesson_id,
+            Notification.body == body,
+            Notification.created_at >= cutoff,
+        )
+    ).first()
+    if existing:
+        return None
+
     n = Notification(
         user_id=user_id,
         type=type,

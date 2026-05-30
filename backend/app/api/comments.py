@@ -135,7 +135,7 @@ def create_comment(
             author_name = f"{current_user.first_name} {current_user.last_name}".strip() or current_user.email
             notif_title = "Ответ на ваш вопрос"
             notif_body = f"{author_name}: «{body.content.strip()[:120]}»"
-            create_notification(
+            notif = create_notification(
                 session,
                 user_id=parent.user_id,
                 type="comment_reply",
@@ -143,10 +143,11 @@ def create_comment(
                 body=notif_body,
                 lesson_id=lesson_id,
             )
-            session.commit()
+            if notif:
+                session.commit()
 
-            # Fire-and-forget email if email service is configured
-            if settings.email_verification_enabled:
+            # Fire-and-forget email (only for new notifications, not deduped ones)
+            if notif and settings.email_verification_enabled:
                 recipient = session.get(User, parent.user_id)
                 if recipient:
                     lesson_url = f"{settings.frontend_url.rstrip('/')}?lesson={lesson_id}"

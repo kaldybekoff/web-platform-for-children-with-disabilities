@@ -18,8 +18,9 @@ function timeAgo(iso: string): string {
 }
 
 function NotifIcon({ type }: { type: string }) {
-  if (type === 'comment_reply') return <MessageCircle className="w-4 h-4 text-orange-500" />;
-  return <BookOpen className="w-4 h-4 text-purple-500" />;
+  if (type === 'comment_reply')
+    return <MessageCircle className="w-4 h-4 text-orange-500 dark:text-orange-300" />;
+  return <BookOpen className="w-4 h-4 text-purple-500 dark:text-purple-300" />;
 }
 
 export function NotificationBell({ onOpenLesson }: NotificationBellProps) {
