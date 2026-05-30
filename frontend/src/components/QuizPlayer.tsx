@@ -3,7 +3,6 @@ import { CheckCircle, XCircle, Trophy, RefreshCw, Clock, ChevronDown, ChevronUp,
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
-import { Badge } from './ui/badge';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as quizzesApi from '../api/quizzes';
 import type { QuizResponseStudent, QuizResultResponse, QuizAttemptResponse } from '../api/types';
@@ -238,34 +237,30 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
                   .map((attempt, index) => (
                     <div
                       key={attempt.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border ${
-                        attempt.passed
-                          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                          : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600'
-                      }`}
+                      className={attempt.passed
+                        ? 'flex items-center justify-between p-3 rounded-lg border bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
+                        : 'flex items-center justify-between p-3 rounded-lg border bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600'}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                          attempt.passed
-                            ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300'
-                            : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                        }`}>
+                        <div className={attempt.passed
+                          ? 'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200'
+                          : 'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-200'}>
                           {attempts.length - index}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
                               {attempt.score}%
                             </span>
                             {attempt.id === bestAttempt?.id && (
-                              <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 text-xs px-1.5 py-0">
+                              <span className="text-xs bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-200 px-1.5 py-0.5 rounded-full font-medium">
                                 {t('Лучший', 'Үздік')}
-                              </Badge>
+                              </span>
                             )}
                             {attempt.passed ? (
                               <CheckCircle className="w-3.5 h-3.5 text-green-500 dark:text-green-400" />
                             ) : (
-                              <XCircle className="w-3.5 h-3.5 text-red-400 dark:text-red-400" />
+                              <XCircle className="w-3.5 h-3.5 text-red-400 dark:text-red-300" />
                             )}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">

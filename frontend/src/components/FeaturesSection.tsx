@@ -11,7 +11,7 @@ export function FeaturesSection() {
       titleKz: 'Ым тілімен видео',
       descriptionRu: 'Все уроки с профессиональным сурдопереводом',
       descriptionKz: 'Барлық сабақтар кәсіби сурдоаударма',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/40',
+      bgColor: 'bg-purple-100 dark:bg-purple-900',
       iconColor: 'text-purple-600 dark:text-purple-300',
     },
     {
@@ -20,7 +20,7 @@ export function FeaturesSection() {
       titleKz: 'Субтитрлер және мәтін',
       descriptionRu: 'Синхронизированные субтитры к каждому видео',
       descriptionKz: 'Әрбір видеоға синхрондалған субтитрлер',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/40',
+      bgColor: 'bg-blue-100 dark:bg-blue-900',
       iconColor: 'text-blue-600 dark:text-blue-300',
     },
     {
@@ -29,7 +29,7 @@ export function FeaturesSection() {
       titleKz: 'Интерактивті тапсырмалар',
       descriptionRu: 'Учись жестам через игровые упражнения',
       descriptionKz: 'Ойын жаттығулары арқылы ым тілін үйрен',
-      bgColor: 'bg-green-100 dark:bg-green-900/40',
+      bgColor: 'bg-green-100 dark:bg-green-900',
       iconColor: 'text-green-600 dark:text-green-300',
     },
     {
@@ -38,7 +38,7 @@ export function FeaturesSection() {
       titleKz: 'Онлайн қолдау',
       descriptionRu: 'Чат с учителями и видеозвонки',
       descriptionKz: 'Мұғалімдермен чат және бейне қоңыраулар',
-      bgColor: 'bg-orange-100 dark:bg-orange-900/40',
+      bgColor: 'bg-orange-100 dark:bg-orange-900',
       iconColor: 'text-orange-600 dark:text-orange-300',
     },
     {
@@ -47,7 +47,7 @@ export function FeaturesSection() {
       titleKz: 'Жетістіктер жүйесі',
       descriptionRu: 'Получай награды за прогресс',
       descriptionKz: 'Прогресс үшін марапаттар ал',
-      bgColor: 'bg-pink-100 dark:bg-pink-900/40',
+      bgColor: 'bg-pink-100 dark:bg-pink-900',
       iconColor: 'text-pink-600 dark:text-pink-300',
     },
     {
@@ -56,7 +56,7 @@ export function FeaturesSection() {
       titleKz: 'Икемді кесте',
       descriptionRu: 'Учись в любое удобное время',
       descriptionKz: 'Кез келген ыңғайлы уақытта оқы',
-      bgColor: 'bg-indigo-100 dark:bg-indigo-900/40',
+      bgColor: 'bg-indigo-100 dark:bg-indigo-900',
       iconColor: 'text-indigo-600 dark:text-indigo-300',
     },
   ];
