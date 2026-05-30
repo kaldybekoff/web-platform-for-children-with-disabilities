@@ -12,7 +12,7 @@ import { TeacherCourses } from './components/TeacherCourses';
 import { TeacherStudents } from './components/TeacherStudents';
 import { TeacherProfile } from './components/TeacherProfile';
 import { TeacherHome } from './components/TeacherHome';
-import { NewsBlock } from './components/NewsBlock';
+import { NewsPage } from './components/NewsPage';
 import { Footer } from './components/Footer';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -73,13 +73,11 @@ function AppContent() {
           {activeSection === 'home' && (
             <>
               <Hero setActiveSection={setActiveSection} />
-              <section className="container mx-auto px-4 py-8">
-                <NewsBlock limit={3} />
-              </section>
               <FeaturesSection />
               <CoursesSection setActiveSection={setActiveSection} onOpenLesson={openLesson} />
             </>
           )}
+          {activeSection === 'news' && <NewsPage />}
           {activeSection === 'courses' && <CoursesSection setActiveSection={setActiveSection} onOpenLesson={openLesson} />}
           {activeSection === 'lesson' && (
             <InteractiveLessonDemo
