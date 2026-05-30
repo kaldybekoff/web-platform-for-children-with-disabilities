@@ -6,6 +6,7 @@ from app.models.quiz import Quiz, Question, Answer, QuizAttempt
 from app.models.lesson_progress import LessonProgress
 from app.models.news import News
 from app.models.success_post import SuccessPost, SuccessPostLike
+from app.models.lesson_comment import LessonComment
 
 __all__ = [
     "User",
@@ -20,4 +21,5 @@ __all__ = [
     "News",
     "SuccessPost",
     "SuccessPostLike",
+    "LessonComment",
 ]
