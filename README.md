@@ -20,9 +20,10 @@
 - Выполнение тестов с мгновенной проверкой ответов
 - Отслеживание прогресса по курсам и урокам
 - Просмотр статистики достижений
-- Вопросы и ответы прямо под уроком (комментарии)
+- Вопросы и ответы прямо под уроком (комментарии с вложенными ответами)
 - AI-ассистент по уроку (быстрые подсказки, резюме, примеры) и общий AI-чат (Google Gemini)
 - Публикация и лайки в ленте успехов сообщества
+- Уведомления: ответ на комментарий, новый урок в записанном курсе (+ email)
 
 ### Преподаватель
 - Создание и редактирование курсов, уроков, тестов
@@ -30,6 +31,7 @@
 - Прикрепление видео, субтитров, отметки поддержки жестового языка
 - Ответы на вопросы студентов прямо в блоке комментариев урока
 - Просмотр прогресса и статистики квизов студентов
+- Уведомления о новых вопросах студентов (ответ на комментарий)
 
 ### Администратор
 - Отдельная админ-панель (starlette-admin) на собственном сервисе/поддомене
@@ -113,6 +115,7 @@ web-platform-for-children-with-disabilities/
 | `success_posts` | user_id, content, likes_count |
 | `success_post_likes` | post_id, user_id (уникальная пара — защита от дублей) |
 | `lesson_comments` | lesson_id, user_id, parent_id (ответы), content |
+| `notifications` | user_id, type, title, body, lesson_id, is_read |
 
 ---
 
@@ -199,6 +202,10 @@ web-platform-for-children-with-disabilities/
 | GET | `/lessons/{id}/comments` | Комментарии к уроку | auth |
 | POST | `/lessons/{id}/comments` | Добавить комментарий / ответ (лимит 20/мин) | auth |
 | DELETE | `/comments/{id}` | Удалить комментарий (автор или admin) | auth |
+| GET | `/notifications?limit=&offset=` | Список уведомлений | auth |
+| GET | `/notifications/unread-count` | Счётчик непрочитанных | auth |
+| POST | `/notifications/{id}/read` | Отметить одно прочитанным | auth |
+| POST | `/notifications/read-all` | Отметить все прочитанными | auth |
 | GET/POST/DELETE | `/community/posts` | Лента успехов (POST — лимит 10/мин) | auth |
 | POST | `/community/posts/{id}/like` | Лайк / снять лайк | auth |
 | POST | `/ai/chat` | AI-ассистент (Gemini) | auth |

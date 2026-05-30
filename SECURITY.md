@@ -200,7 +200,8 @@ font-src 'self' data: https://cdn.jsdelivr.net;
 - `.env` и `*.env.*` находятся в `.gitignore` — не попадают в репозиторий
 - `SECRET_KEY` обязателен — без него приложение не запускается
 - При пустом `GEMINI_API_KEY` — `/api/ai/chat` возвращает `503`
-- На фронтенде нет секретов — только публичный `VITE_API_URL`
+- На фронтенде нет секретов — только публичные переменные `VITE_API_URL`, `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`
+- Cloudinary upload preset — **Unsigned** (намеренно): загрузка идёт напрямую из браузера, бэкенд не участвует и не получает файл; секрет Cloudinary на фронте не нужен
 - Соединение с БД: `pool_pre_ping=True`, `pool_recycle=300` — устойчивость к разрыву idle-соединений (Neon PostgreSQL)
 
 ---
@@ -213,6 +214,8 @@ font-src 'self' data: https://cdn.jsdelivr.net;
 - Все запросы отправляются с `credentials: 'include'` — cookie автоматически прикрепляется браузером
 - При `401` — CSRF-токен и данные пользователя очищаются, пользователь разлогинивается
 - Ролевая защита UI (страницы admin / teacher) — дополнительный слой; основная защита на backend
+- После Google OAuth callback бэкенд ставит JWT в HttpOnly cookie и редиректит на `?google=1`;
+  CSRF-токен SPA забирает запросом `GET /api/auth/session` — в URL он не попадает
 - После Google OAuth callback бэкенд ставит JWT в HttpOnly cookie и редиректит на `?google=1`;
   CSRF-токен SPA забирает запросом `GET /api/auth/session` — в URL он не попадает
 
