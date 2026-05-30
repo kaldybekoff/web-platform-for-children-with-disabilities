@@ -1,4 +1,5 @@
 """Lesson comments API."""
+import asyncio
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -6,6 +7,9 @@ from pydantic import BaseModel
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser
+from app.api.notifications import create_notification
+from app.core.config import settings
+from app.core.email import send_notification_email
 from app.core.limiter import limiter
 from app.db.session import get_session
 from app.models.lesson import Lesson
@@ -123,6 +127,39 @@ def create_comment(
     session.add(comment)
     session.commit()
     session.refresh(comment)
+
+    # Notify parent comment author if this is a reply (and it's not a self-reply)
+    if body.parent_id:
+        parent = session.get(LessonComment, body.parent_id)
+        if parent and parent.user_id != current_user.id:
+            author_name = f"{current_user.first_name} {current_user.last_name}".strip() or current_user.email
+            notif_title = "Ответ на ваш вопрос"
+            notif_body = f"{author_name}: «{body.content.strip()[:120]}»"
+            create_notification(
+                session,
+                user_id=parent.user_id,
+                type="comment_reply",
+                title=notif_title,
+                body=notif_body,
+                lesson_id=lesson_id,
+            )
+            session.commit()
+
+            # Fire-and-forget email if email service is configured
+            if settings.email_verification_enabled:
+                recipient = session.get(User, parent.user_id)
+                if recipient:
+                    lesson_url = f"{settings.frontend_url.rstrip('/')}?lesson={lesson_id}"
+                    asyncio.create_task(
+                        send_notification_email(
+                            recipient.email,
+                            f"{recipient.first_name} {recipient.last_name}".strip() or recipient.email,
+                            notif_title,
+                            notif_body,
+                            lesson_url,
+                        )
+                    )
+
     return _build(comment, current_user, [])
 
 

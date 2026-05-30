@@ -59,7 +59,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-      <Header activeSection={activeSection} setActiveSection={handleSetActiveSection} onLogout={handleLogout} userRole={userRole} />
+      <Header activeSection={activeSection} setActiveSection={handleSetActiveSection} onLogout={handleLogout} onOpenLesson={openLesson} userRole={userRole} />
 
       {userRole === 'student' && (
         <>

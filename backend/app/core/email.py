@@ -185,6 +185,61 @@ async def send_verification_email(to_email: str, name: str, token: str) -> None:
         raise
 
 
+async def send_notification_email(to_email: str, name: str, title: str, body: str, lesson_url: str | None = None) -> None:
+    """Send an in-app notification as email (comment reply, new lesson, etc.)."""
+    cta_block = ""
+    if lesson_url:
+        cta_block = f"""
+        <div style="text-align:center;margin:0 0 24px;">
+          <a href="{lesson_url}"
+             style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#3b82f6);
+                    color:#fff;padding:12px 28px;border-radius:8px;
+                    text-decoration:none;font-size:15px;font-weight:600;">
+            Перейти к уроку
+          </a>
+        </div>"""
+    html = f"""<!DOCTYPE html>
+<html lang="ru">
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 0;">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#fff;border-radius:12px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#7c3aed,#3b82f6);
+                     padding:28px 32px;text-align:center;">
+            <h1 style="color:#fff;margin:0;font-size:24px;">QazEdu Special</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 40px;">
+            <h2 style="margin:0 0 10px;color:#111827;font-size:18px;">{title}</h2>
+            <p style="color:#374151;line-height:1.6;margin:0 0 20px;">{body}</p>
+            {cta_block}
+            <p style="color:#9ca3af;font-size:12px;margin:0;">
+              Вы получили это письмо, так как являетесь пользователем QazEdu Special.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:16px 40px;
+                     border-top:1px solid #e5e7eb;text-align:center;">
+            <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 QazEdu Special</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+    try:
+        await _send(to_email, f"{title} — QazEdu Special", html)
+        logger.info("Notification email sent to %s: %s", to_email, title)
+    except Exception:
+        logger.exception("Failed to send notification email to %s", to_email)
+
+
 async def send_password_reset_email(
     to_email: str, name: str, token: str, *, is_new: bool = False
 ) -> None:

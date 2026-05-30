@@ -2,12 +2,14 @@ import { Home, BookOpen, Video, Users, Languages, UserCircle, User, Sun, Moon, L
 import { Button } from './ui/button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { NotificationBell } from './NotificationBell';
 import type { UserRole } from './AuthPage';
 
 interface HeaderProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   onLogout?: () => void;
+  onOpenLesson: (courseId: number, lessonId: number) => void;
   userRole: UserRole;
 }
 
@@ -30,7 +32,7 @@ const teacherNav = [
   { id: 'community', icon: MessageCircle, labelRu: 'Сообщество', labelKz: 'Қоғамдастық' },
 ];
 
-export function Header({ activeSection, setActiveSection, onLogout, userRole }: HeaderProps) {
+export function Header({ activeSection, setActiveSection, onLogout, onOpenLesson, userRole }: HeaderProps) {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
 
@@ -82,6 +84,7 @@ export function Header({ activeSection, setActiveSection, onLogout, userRole }: 
 
           {/* Переключатель языка и темы */}
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <NotificationBell onOpenLesson={onOpenLesson} />
             <Button
               onClick={toggleTheme}
               variant="outline"

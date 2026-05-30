@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import settings
 from app.core.limiter import limiter
-from app.api import auth, users, courses, lessons, enrollments, quizzes, progress, teacher, news, community, ai, comments
+from app.api import auth, users, courses, lessons, enrollments, quizzes, progress, teacher, news, community, ai, comments, notifications
 from app.db.session import engine, create_db_and_tables
 from app.core.seed import run_seeds
 
@@ -73,6 +73,7 @@ app.include_router(news.router, prefix="/api")
 app.include_router(community.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(comments.router, prefix="/api")
+app.include_router(notifications.router, prefix="/api")
 
 
 @app.on_event("startup")

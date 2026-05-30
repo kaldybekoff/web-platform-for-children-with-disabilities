@@ -3,8 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
 from app.api.deps import CurrentUser, require_teacher_or_admin
+from app.api.notifications import create_notification
 from app.db.session import get_session
 from app.models.course import Course
+from app.models.enrollment import Enrollment
 from app.models.lesson import Lesson
 from app.models.user import User
 from app.schemas.lesson import LessonCreate, LessonResponse, LessonUpdate
@@ -91,6 +93,23 @@ def create_lesson(
     session.add(lesson)
     session.commit()
     session.refresh(lesson)
+
+    # Notify enrolled students about the new lesson
+    enrollments = session.exec(
+        select(Enrollment).where(Enrollment.course_id == body.course_id)
+    ).all()
+    for enrollment in enrollments:
+        create_notification(
+            session,
+            user_id=enrollment.student_id,
+            type="new_lesson",
+            title=f"Новый урок в курсе «{course.title}»",
+            body=f"Доступен новый урок: «{lesson.title}»",
+            lesson_id=lesson.id,
+        )
+    if enrollments:
+        session.commit()
+
     return lesson_to_response(lesson)
 
 
