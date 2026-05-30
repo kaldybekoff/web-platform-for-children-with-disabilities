@@ -85,6 +85,7 @@
 | `POST /api/auth/reset-password` | 5 запросов/мин |
 | `POST /api/me/password` | 5 запросов/мин |
 | `POST /api/community/posts` | 10 запросов/мин |
+| `POST /api/lessons/{id}/comments` | 20 запросов/мин |
 | `POST /api/ai/chat` | 10 запросов/мин |
 
 При превышении — `429 Too Many Requests`.

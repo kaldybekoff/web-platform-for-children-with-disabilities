@@ -15,16 +15,20 @@
 
 ### Студент
 - Регистрация с подтверждением email, вход через Google OAuth
+- Поиск курсов и новостей по ключевым словам
 - Запись на курсы и прохождение видеоуроков
 - Выполнение тестов с мгновенной проверкой ответов
 - Отслеживание прогресса по курсам и урокам
 - Просмотр статистики достижений
+- Вопросы и ответы прямо под уроком (комментарии)
+- AI-ассистент по уроку (быстрые подсказки, резюме, примеры) и общий AI-чат (Google Gemini)
 - Публикация и лайки в ленте успехов сообщества
-- Диалог с AI-ассистентом (Google Gemini)
 
 ### Преподаватель
 - Создание и редактирование курсов, уроков, тестов
+- Загрузка обложек курсов через drag-and-drop (Cloudinary) или по URL
 - Прикрепление видео, субтитров, отметки поддержки жестового языка
+- Ответы на вопросы студентов прямо в блоке комментариев урока
 - Просмотр прогресса и статистики квизов студентов
 
 ### Администратор
@@ -47,14 +51,15 @@
 
 | Компонент | Стек |
 |-----------|------|
-| Frontend | React 18.3.1, TypeScript, Vite 6.3.5, Radix UI, Tailwind CSS, shadcn/ui |
+| Frontend | React 18.3.1, TypeScript 5.9, Vite 6.3.5, Radix UI, Tailwind CSS, shadcn/ui |
 | Backend | FastAPI 0.115.6, SQLModel 0.0.22, Alembic 1.14.0, Uvicorn 0.32.1 |
 | База данных | PostgreSQL (Neon) / SQLite (локально) |
 | Аутентификация | JWT HS256 (python-jose) в HTTP-only cookie + CSRF-токен, bcrypt, Google OAuth2 (authlib) |
 | Админ-панель | starlette-admin (отдельный ASGI-сервис) |
 | Email | Resend API (HTTP); SMTP — резервный путь в коде |
 | AI | Google Gemini API (google-genai) |
-| Безопасность | slowapi (rate limiting), SecurityHeadersMiddleware (CSP и пр.), CSRF double-submit, SessionMiddleware |
+| Загрузка файлов | Cloudinary (unsigned upload, бесплатно 25 GB) — обложки курсов |
+| Безопасность | slowapi (rate limiting), SecurityHeadersMiddleware (CSP, HSTS и пр.), CSRF double-submit, SessionMiddleware |
 | Контейнеризация | Docker, docker-compose (3 сервиса: backend, admin, frontend) |
 
 ---
@@ -73,7 +78,7 @@ web-platform-for-children-with-disabilities/
 │       ├── admin_app.py          # ASGI-вход отдельного сервиса админки
 │       ├── api/                  # Роутеры: auth, users, courses, lessons,
 │       │                         # enrollments, quizzes, progress,
-│       │                         # teacher, news, community, ai
+│       │                         # teacher, news, community, ai, comments
 │       ├── admin/                # starlette-admin: views, auth provider
 │       ├── models/               # SQLModel модели (таблицы БД)
 │       ├── schemas/              # Pydantic схемы запросов и ответов
@@ -107,6 +112,7 @@ web-platform-for-children-with-disabilities/
 | `news` | title/content на ru/kz, media, is_published, author_id |
 | `success_posts` | user_id, content, likes_count |
 | `success_post_likes` | post_id, user_id (уникальная пара — защита от дублей) |
+| `lesson_comments` | lesson_id, user_id, parent_id (ответы), content |
 
 ---
 
@@ -141,7 +147,7 @@ web-platform-for-children-with-disabilities/
 
 | Метод | Путь | Описание | Роль |
 |-------|------|----------|------|
-| GET | `/courses` | Список курсов | auth |
+| GET | `/courses?search=&level=` | Список курсов с поиском и фильтром | auth |
 | GET | `/courses/{id}` | Детали курса | auth |
 | POST | `/courses` | Создать курс | teacher / admin |
 | PATCH | `/courses/{id}` | Обновить курс | владелец / admin |
@@ -189,7 +195,10 @@ web-platform-for-children-with-disabilities/
 
 | Метод | Путь | Описание | Роль |
 |-------|------|----------|------|
-| GET | `/news` | Опубликованные новости | auth |
+| GET | `/news?search=` | Опубликованные новости с поиском | auth |
+| GET | `/lessons/{id}/comments` | Комментарии к уроку | auth |
+| POST | `/lessons/{id}/comments` | Добавить комментарий / ответ (лимит 20/мин) | auth |
+| DELETE | `/comments/{id}` | Удалить комментарий (автор или admin) | auth |
 | GET/POST/DELETE | `/community/posts` | Лента успехов (POST — лимит 10/мин) | auth |
 | POST | `/community/posts/{id}/like` | Лайк / снять лайк | auth |
 | POST | `/ai/chat` | AI-ассистент (Gemini) | auth |
@@ -294,6 +303,17 @@ GOOGLE_CLIENT_SECRET=GOCSPX-xxx
 
 # AI (опционально)
 GEMINI_API_KEY=<ключ из Google AI Studio>
+```
+
+Переменные окружения **фронтенда** задаются на Vercel (Settings → Environment Variables):
+
+```env
+VITE_API_URL=https://api.qazedu.uk
+
+# Cloudinary (опционально — загрузка обложек курсов)
+# Если не заданы, поле загрузки заменяется обычным URL-input
+VITE_CLOUDINARY_CLOUD_NAME=твой_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=qazedu_unsigned
 ```
 
 ---
