@@ -11,8 +11,8 @@ export function FeaturesSection() {
       titleKz: 'Ым тілімен видео',
       descriptionRu: 'Все уроки с профессиональным сурдопереводом',
       descriptionKz: 'Барлық сабақтар кәсіби сурдоаударма',
-      color: 'from-purple-400 to-purple-600',
-      bgColor: 'bg-purple-100',
+      bgColor: 'bg-purple-100 dark:bg-purple-900/40',
+      iconColor: 'text-purple-600 dark:text-purple-300',
     },
     {
       icon: Subtitles,
@@ -20,8 +20,8 @@ export function FeaturesSection() {
       titleKz: 'Субтитрлер және мәтін',
       descriptionRu: 'Синхронизированные субтитры к каждому видео',
       descriptionKz: 'Әрбір видеоға синхрондалған субтитрлер',
-      color: 'from-blue-400 to-blue-600',
-      bgColor: 'bg-blue-100',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/40',
+      iconColor: 'text-blue-600 dark:text-blue-300',
     },
     {
       icon: HandMetal,
@@ -29,8 +29,8 @@ export function FeaturesSection() {
       titleKz: 'Интерактивті тапсырмалар',
       descriptionRu: 'Учись жестам через игровые упражнения',
       descriptionKz: 'Ойын жаттығулары арқылы ым тілін үйрен',
-      color: 'from-green-400 to-green-600',
-      bgColor: 'bg-green-100',
+      bgColor: 'bg-green-100 dark:bg-green-900/40',
+      iconColor: 'text-green-600 dark:text-green-300',
     },
     {
       icon: MessageCircle,
@@ -38,8 +38,8 @@ export function FeaturesSection() {
       titleKz: 'Онлайн қолдау',
       descriptionRu: 'Чат с учителями и видеозвонки',
       descriptionKz: 'Мұғалімдермен чат және бейне қоңыраулар',
-      color: 'from-orange-400 to-orange-600',
-      bgColor: 'bg-orange-100',
+      bgColor: 'bg-orange-100 dark:bg-orange-900/40',
+      iconColor: 'text-orange-600 dark:text-orange-300',
     },
     {
       icon: Trophy,
@@ -47,8 +47,8 @@ export function FeaturesSection() {
       titleKz: 'Жетістіктер жүйесі',
       descriptionRu: 'Получай награды за прогресс',
       descriptionKz: 'Прогресс үшін марапаттар ал',
-      color: 'from-pink-400 to-pink-600',
-      bgColor: 'bg-pink-100',
+      bgColor: 'bg-pink-100 dark:bg-pink-900/40',
+      iconColor: 'text-pink-600 dark:text-pink-300',
     },
     {
       icon: Clock,
@@ -56,8 +56,8 @@ export function FeaturesSection() {
       titleKz: 'Икемді кесте',
       descriptionRu: 'Учись в любое удобное время',
       descriptionKz: 'Кез келген ыңғайлы уақытта оқы',
-      color: 'from-indigo-400 to-indigo-600',
-      bgColor: 'bg-indigo-100',
+      bgColor: 'bg-indigo-100 dark:bg-indigo-900/40',
+      iconColor: 'text-indigo-600 dark:text-indigo-300',
     },
   ];
 
@@ -83,8 +83,8 @@ export function FeaturesSection() {
               key={index}
               className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 border-2 border-gray-100 dark:border-gray-700"
             >
-              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4`}>
-                <Icon className="w-8 h-8 text-white" />
+              <div className={`w-16 h-16 rounded-2xl ${feature.bgColor} flex items-center justify-center mb-4`}>
+                <Icon className={`w-8 h-8 ${feature.iconColor}`} />
               </div>
 
               <h3 className="text-gray-800 dark:text-gray-100 mb-2">

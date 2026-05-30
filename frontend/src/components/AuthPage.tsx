@@ -253,13 +253,13 @@ export function AuthPage() {
                     {t('Email', 'Email')}
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder={t('example@mail.com', 'example@mail.com')}
                       required
                     />
@@ -271,13 +271,13 @@ export function AuthPage() {
                     {t('Пароль', 'Құпия сөз')}
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
-                      className="pl-10 pr-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 pr-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder="••••••••"
                       required
                     />
@@ -380,13 +380,13 @@ export function AuthPage() {
                     {t('Полное имя', 'Толық аты')}
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="name"
                       type="text"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder={t('Иван Иванов', 'Иван Иванов')}
                       required
                     />
@@ -398,13 +398,13 @@ export function AuthPage() {
                     {t('Email', 'Email')}
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="reg-email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder="example@mail.com"
                       required
                     />
@@ -416,13 +416,13 @@ export function AuthPage() {
                     {t('Пароль', 'Құпия сөз')}
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="reg-password"
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
                       onChange={(e) => handleInputChange('password', e.target.value)}
-                      className="pl-10 pr-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 pr-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder="••••••••"
                       required
                     />
@@ -471,7 +471,7 @@ export function AuthPage() {
                     {t('Подтвердите пароль', 'Құпия сөзді растаңыз')}
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="confirm-password"
                       type={showPassword ? 'text' : 'password'}
@@ -541,7 +541,7 @@ export function AuthPage() {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input type="email" value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder="example@mail.com" required />
                   </div>
                 </div>
@@ -570,7 +570,7 @@ export function AuthPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input type={showNewPassword ? 'text' : 'password'} value={formData.newPassword}
                       onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                      className="pl-10 pr-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 pr-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder="••••••••" required />
                     <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -600,7 +600,7 @@ export function AuthPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <Input type="password" value={formData.confirmNewPassword}
                       onChange={(e) => handleInputChange('confirmNewPassword', e.target.value)}
-                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600"
+                      className="pl-10 h-12 rounded-xl border-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
                       placeholder="••••••••" required />
                   </div>
                 </div>

@@ -263,9 +263,9 @@ export function QuizPlayer({ lessonId, onComplete }: QuizPlayerProps) {
                               </Badge>
                             )}
                             {attempt.passed ? (
-                              <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                              <CheckCircle className="w-3.5 h-3.5 text-green-500 dark:text-green-400" />
                             ) : (
-                              <XCircle className="w-3.5 h-3.5 text-red-400" />
+                              <XCircle className="w-3.5 h-3.5 text-red-400 dark:text-red-400" />
                             )}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">

@@ -230,7 +230,7 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) { setShowCreate(false); setNewTitle(''); setNewDesc(''); setNewLevel('beginner'); setNewImageUrl(''); } }}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative w-full max-w-xl bg-gray-900 dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="relative w-full max-w-xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
             {/* Modal header */}
             <div className="flex items-center justify-between px-5 py-4 bg-purple-600">
               <div className="flex items-center gap-2">
@@ -248,12 +248,12 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
             {/* Modal body */}
             <div className="px-6 py-6 flex flex-col gap-5">
               <div>
-                <Label className="text-xs text-gray-400 mb-1 block">{t('Название', 'Атауы')}</Label>
+                <Label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">{t('Название', 'Атауы')}</Label>
                 <Input
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder={t('Введите название курса', 'Курс атауын енгізіңіз')}
-                  className="h-10 rounded-lg bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-purple-500"
+                  className="h-10 rounded-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-purple-500"
                 />
               </div>
               <div>
@@ -262,7 +262,7 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
                   placeholder={t('Введите описание курса', 'Курс сипаттамасын енгізіңіз')}
-                  className="h-10 rounded-lg bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-500 focus:border-purple-500"
+                  className="h-10 rounded-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-purple-500"
                 />
               </div>
               <div>
@@ -277,8 +277,8 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                 <select
                   value={newLevel}
                   onChange={(e) => setNewLevel(e.target.value)}
-                  style={{ colorScheme: 'dark' }}
-                  className="h-10 w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 text-sm px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  style={{ colorScheme: 'normal' }}
+                  className="h-10 w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {levelOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -299,7 +299,7 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 h-10 rounded-lg border-gray-600 text-gray-300 hover:bg-gray-800"
+                  className="flex-1 h-10 rounded-lg border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => { setShowCreate(false); setNewTitle(''); setNewDesc(''); setNewLevel('beginner'); setNewImageUrl(''); }}
                 >
                   {t('Отмена', 'Болдырмау')}
@@ -333,7 +333,7 @@ export function TeacherCourses({ onOpenLesson }: TeacherCoursesProps) {
                   <select
                     value={newLevel}
                     onChange={(e) => setNewLevel(e.target.value)}
-                    style={{ colorScheme: 'dark' }}
+                    style={{ colorScheme: 'normal' }}
                     className="h-9 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     {levelOptions.map((option) => (

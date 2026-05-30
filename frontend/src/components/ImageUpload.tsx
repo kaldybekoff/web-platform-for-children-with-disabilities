@@ -107,7 +107,7 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
           ) : (
             <>
               <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
-                <ImageIcon className="w-6 h-6 text-gray-400" />
+                <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center px-4">
                 {t('Перетащите или нажмите для загрузки', 'Сүйреңіз немесе жүктеу үшін басыңыз')}
@@ -120,7 +120,7 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
 
       {/* Also allow URL input as alternative */}
       <div className="flex items-center gap-2 mt-1">
-        <Upload className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+        <Upload className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 shrink-0" />
         <input
           type="url"
           value={value}

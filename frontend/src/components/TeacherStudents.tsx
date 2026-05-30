@@ -85,14 +85,14 @@ export function TeacherStudents() {
                       {s.quiz_stats ? (
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1" title={t('Пройдено/Попыток', 'Өтілді/Әрекеттер')}>
-                            <Target className="w-3 h-3 text-blue-500" />
+                            <Target className="w-3 h-3 text-blue-500 dark:text-blue-400" />
                             <span className="text-xs text-gray-700 dark:text-gray-300">
                               {s.quiz_stats.passed_count}/{s.quiz_stats.attempts_count}
                             </span>
                           </div>
                           {s.quiz_stats.best_score !== null && (
                             <div className="flex items-center gap-1" title={t('Лучший балл', 'Үздік балл')}>
-                              <Trophy className="w-3 h-3 text-yellow-500" />
+                              <Trophy className="w-3 h-3 text-yellow-500 dark:text-yellow-400" />
                               <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                                 {s.quiz_stats.best_score}%
                               </span>

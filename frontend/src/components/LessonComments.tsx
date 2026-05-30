@@ -76,7 +76,7 @@ function CommentItem({ comment, currentUserId, currentUserRole, onReply, onDelet
             {canDelete && (
               <button
                 onClick={() => onDelete(comment.id)}
-                className="text-xs text-red-400 hover:text-red-500 flex items-center gap-1"
+                className="text-xs text-red-400 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 flex items-center gap-1"
               >
                 <Trash2 className="w-3 h-3" />
                 {t('Удалить', 'Жою')}
@@ -180,7 +180,7 @@ export function LessonComments({ lessonId }: LessonCommentsProps) {
             </span>
           )}
         </div>
-        <span className="text-xs text-gray-400">{isOpen ? '▲' : '▼'}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{isOpen ? '▲' : '▼'}</span>
       </button>
 
       {isOpen && (
@@ -226,7 +226,7 @@ export function LessonComments({ lessonId }: LessonCommentsProps) {
                 <span className="text-xs text-purple-700 dark:text-purple-300">
                   {t('Ответ', 'Жауап')}: {replyTo.name}
                 </span>
-                <button onClick={() => setReplyTo(null)} className="text-gray-400 hover:text-gray-600">
+                <button onClick={() => setReplyTo(null)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
                   <span className="text-xs">✕</span>
                 </button>
               </div>

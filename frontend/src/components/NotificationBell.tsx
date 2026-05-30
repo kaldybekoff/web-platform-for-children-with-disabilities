@@ -152,8 +152,8 @@ export function NotificationBell({ onOpenLesson }: NotificationBellProps) {
                   key={item.id}
                   onClick={() => handleClick(item)}
                   className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors
-                    hover:bg-gray-50 dark:hover:bg-gray-700/50
-                    ${!item.is_read ? 'bg-purple-50/60 dark:bg-purple-900/10' : ''}`}
+                    hover:bg-gray-100 dark:hover:bg-gray-700/50
+                    ${!item.is_read ? 'bg-purple-50 dark:bg-purple-900/10' : 'bg-white dark:bg-transparent'}`}
                 >
                   {/* Icon */}
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5
