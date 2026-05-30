@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Twitter, Linkedin, Rss } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export function Footer() {
@@ -61,13 +61,13 @@ export function Footer() {
             <h4 className="text-white mb-4">{t('Мы в соцсетях', 'Біз әлеуметтік желілерде')}</h4>
             <div className="flex gap-3">
               <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors">
-                <Facebook className="w-5 h-5" />
+                <Twitter className="w-5 h-5" />
               </a>
               <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors">
-                <Instagram className="w-5 h-5" />
+                <Linkedin className="w-5 h-5" />
               </a>
               <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors">
-                <Youtube className="w-5 h-5" />
+                <Rss className="w-5 h-5" />
               </a>
             </div>
             <p className="text-purple-200 dark:text-gray-400 text-sm mt-4">
