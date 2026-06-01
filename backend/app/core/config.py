@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: str = "http://localhost:5173,http://localhost:3000"
 
-    # AI (Gemini)
-    gemini_api_key: str = ""
+    # AI (Groq)
+    groq_api_key: str = ""
 
     # Admin seed credentials (должны явно задаваться через env при необходимости)
     admin_email: str | None = None
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Debug: print loaded API key status at startup
-if settings.gemini_api_key:
-    print(f"[CONFIG] Gemini API key loaded (length: {len(settings.gemini_api_key)})")
+if settings.groq_api_key:
+    print(f"[CONFIG] Groq API key loaded (length: {len(settings.groq_api_key)})")
 else:
-    print(f"[CONFIG] WARNING: Gemini API key NOT loaded. ENV_FILE path: {ENV_FILE}, exists: {ENV_FILE.exists()}")
+    print(f"[CONFIG] WARNING: Groq API key NOT loaded. ENV_FILE path: {ENV_FILE}, exists: {ENV_FILE.exists()}")

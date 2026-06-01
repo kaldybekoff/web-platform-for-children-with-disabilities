@@ -1,8 +1,8 @@
-"""AI Chat endpoint using Google Gemini API."""
+"""AI Chat endpoint using Groq API (Llama 3.3 70B)."""
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Request, status, Depends
+from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
 from app.api.deps import CurrentUser
@@ -50,46 +50,46 @@ async def chat_with_ai(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Message cannot be empty",
         )
-    
-    gemini_api_key = settings.gemini_api_key
-    if not gemini_api_key:
+
+    groq_api_key = settings.groq_api_key
+    if not groq_api_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="AI service is not configured",
         )
-    
-    try:
-        from google import genai
 
-        client = genai.Client(api_key=gemini_api_key)
+    try:
+        from groq import Groq
+
+        client = Groq(api_key=groq_api_key)
 
         system = SYSTEM_PROMPT
         if body.lesson_context and body.lesson_context.strip():
             system += f"\n\nКонтекст текущего урока:\n{body.lesson_context.strip()[:2000]}"
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=[
-                {"role": "user", "parts": [{"text": system}]},
-                {"role": "model", "parts": [{"text": "Понял! Я готов помочь студентам QazEdu с их учебными вопросами."}]},
-                {"role": "user", "parts": [{"text": body.message.strip()}]},
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": body.message.strip()},
             ],
+            max_tokens=1024,
+            temperature=0.7,
         )
-        
-        reply = response.text if response.text else "Извините, не удалось получить ответ. Попробуйте переформулировать вопрос."
-        
+
+        reply = completion.choices[0].message.content or "Извините, не удалось получить ответ. Попробуйте переформулировать вопрос."
+
         return ChatResponse(reply=reply)
-        
+
     except ImportError:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="AI library not installed",
         )
     except Exception as e:
-        # Log the real error server-side; never echo upstream exception text to the client.
         logger.exception("AI chat request failed")
         error_message = str(e).upper()
-        if "API_KEY" in error_message or "AUTHENTICATION" in error_message:
+        if "API_KEY" in error_message or "AUTHENTICATION" in error_message or "AUTH" in error_message:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="AI service is temporarily unavailable",
